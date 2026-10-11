@@ -52,21 +52,21 @@ export class AccountManager {
         .run(id, label, profilePath, now, now);
 
       if (remoteProjectId) {
-        const defaultProjId = "proj-default";
+        const targetProjId = `proj-${id}`;
         this.db.db
           .prepare(
             `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
-             VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+             VALUES (?, ?, ?, ?, ?)`,
           )
-          .run(defaultProjId, now, now);
+          .run(targetProjId, `Dự án Flow - ${label}`, `Tự động tạo cho ${label}`, now, now);
 
-        const bindingId = `bind-${id}-${defaultProjId}`;
+        const bindingId = `bind-${id}-${targetProjId}`;
         this.db.db
           .prepare(
-            `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
+            `INSERT OR REPLACE INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
              VALUES (?, ?, ?, ?, 'verified', ?, ?, ?)`,
           )
-          .run(bindingId, defaultProjId, id, remoteProjectId, now, now, now);
+          .run(bindingId, targetProjId, id, remoteProjectId, now, now, now);
       }
     });
 
@@ -94,37 +94,38 @@ export class AccountManager {
       }
 
       if (params.remoteProjectId !== undefined) {
-        const defaultProjId = "proj-default";
+        const targetProjId = `proj-${id}`;
+        const label = params.label ?? acc.label;
         this.db.db
           .prepare(
             `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
-             VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+             VALUES (?, ?, ?, ?, ?)`,
           )
-          .run(defaultProjId, now, now);
+          .run(targetProjId, `Dự án Flow - ${label}`, `Tự động tạo cho ${label}`, now, now);
 
         const existingBinding = this.db.db
           .prepare(
             `SELECT id FROM project_bindings 
-             WHERE project_id = ? AND account_id = ? AND archived_at IS NULL`,
+             WHERE account_id = ? AND archived_at IS NULL`,
           )
-          .get(defaultProjId, id) as { id: string } | undefined;
+          .get(id) as { id: string } | undefined;
 
         if (existingBinding) {
           this.db.db
             .prepare(
               `UPDATE project_bindings 
-               SET remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
+               SET project_id = ?, remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
                WHERE id = ?`,
             )
-            .run(params.remoteProjectId, now, now, existingBinding.id);
+            .run(targetProjId, params.remoteProjectId, now, now, existingBinding.id);
         } else {
-          const bindingId = `bind-${id}-${defaultProjId}`;
+          const bindingId = `bind-${id}-${targetProjId}`;
           this.db.db
             .prepare(
               `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
                VALUES (?, ?, ?, ?, 'verified', ?, ?, ?)`,
             )
-            .run(bindingId, defaultProjId, id, params.remoteProjectId, now, now, now);
+            .run(bindingId, targetProjId, id, params.remoteProjectId, now, now, now);
         }
       }
     });

@@ -744,6 +744,154 @@ export function getDashboardHtml(): string {
       flex: 1;
     }
 
+    /* ─── Hierarchy Structure (Accounts > Projects > Images) ─── */
+    .hierarchy-level-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-lg);
+      margin-bottom: var(--space-lg);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .hierarchy-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .hierarchy-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      margin-bottom: 4px;
+    }
+    .hierarchy-tag.level-1 { background: rgba(59, 130, 246, 0.12); color: #2563eb; border-color: rgba(59, 130, 246, 0.25); }
+    .hierarchy-tag.level-2 { background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25); }
+    .hierarchy-tag.level-3 { background: rgba(245, 158, 11, 0.12); color: #d97706; border-color: rgba(245, 158, 11, 0.25); }
+
+    .accounts-filter-pills {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .account-pill {
+      background: var(--surface-muted);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: all var(--motion-fast) ease;
+    }
+    .account-pill:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .account-pill.active {
+      background: var(--surface);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .project-card.active-selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), var(--card-shadow);
+      background: var(--surface);
+    }
+
+    /* Images Workspace Sub-tabs */
+    .images-workspace-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .project-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    .project-breadcrumb .crumb-active {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .images-type-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--surface-muted);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+    }
+    .images-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 7px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--motion-fast) ease;
+    }
+    .images-tab-btn:hover {
+      color: var(--text);
+    }
+    .images-tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .images-subview {
+      display: none;
+    }
+    .images-subview.active {
+      display: block;
+    }
+    .images-subview-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: var(--space-md);
+      padding: 10px 14px;
+      background: var(--surface-muted);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
     /* Live Tracker */
     .tracker {
       display: none;
@@ -1421,15 +1569,15 @@ export function getDashboardHtml(): string {
     </div>
 
     <!-- ============================================================ -->
-    <!-- TAB VIEW 2: QUẢN LÝ PROJECTS & THƯ VIỆN ẢNH THAM CHIẾU (REF)   -->
+    <!-- TAB VIEW 2: QUẢN LÝ PROJECTS & THƯ VIỆN ẢNH (PHÂN CẤP 3 TẦNG)-->
     <!-- ============================================================ -->
     <div id="viewProjectsAssets" class="tab-view">
       <!-- Header Banner Card -->
       <div class="profiles-hero-card">
         <div>
-          <span class="card-eyebrow">Quản Trị Không Gian Làm Việc</span>
-          <h2 class="card-title" style="font-size: 24px;">Projects & Thư Viện Ref Assets</h2>
-          <p class="card-desc">Quản lý các Dự án tạo ảnh (Projects), cấu hình tài khoản Google Flow liên kết và tái sử dụng các ảnh mẫu (Reference Images) đã tải lên mà không cần upload nhiều lần.</p>
+          <span class="card-eyebrow">Quản Trị Không Gian Phân Cấp</span>
+          <h2 class="card-title" style="font-size: 24px;">Phân Cấp: Accounts › Projects › Images</h2>
+          <p class="card-desc">Cấu trúc 3 cấp độ rõ ràng: Chọn tài khoản Google (Account) › Quản lý dự án (Project) › Thư viện ảnh tham chiếu đã tải lên & Ảnh AI đã tạo trên Google Flow.</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
           <button type="button" class="btn-quiet" onclick="refreshProjectsAndAssets()">
@@ -1452,27 +1600,46 @@ export function getDashboardHtml(): string {
         </div>
         <div class="metric-tile">
           <span class="metric-val" style="color: var(--primary);" id="kpiTotalRefAssets">0</span>
-          <span class="metric-lbl">Ảnh Ref trong Kho</span>
+          <span class="metric-lbl">Ảnh Ref Đã Tải Lên</span>
         </div>
         <div class="metric-tile">
-          <span class="metric-val" style="color: var(--success);" id="kpiRefUsedJobs">0</span>
-          <span class="metric-lbl">Lượt tái sử dụng Ref</span>
+          <span class="metric-val" style="color: var(--success);" id="kpiTotalFlowOutputs">0</span>
+          <span class="metric-lbl">Ảnh Tạo Trên Flow</span>
         </div>
         <div class="metric-tile">
           <span class="metric-val" style="color: var(--info);" id="kpiProjectsActive">0</span>
-          <span class="metric-lbl">Projects có liên kết Account</span>
+          <span class="metric-lbl">Accounts Đã Kết Nối</span>
         </div>
       </div>
 
-      <!-- Section 1: Projects List -->
-      <section class="bento-card bento-full" style="margin-bottom: var(--space-xl);">
-        <div class="card-head">
-          <div class="card-title-group">
-            <span class="card-eyebrow">Danh Sách Dự Án</span>
-            <h3 class="card-title" style="font-size: 18px;">Dự Án Tạo Ảnh (Projects)</h3>
-            <p class="card-desc">Mỗi project có thể liên kết với một Chrome Profile và Flow Remote Project ID riêng</p>
+      <!-- ─── LEVEL 1: ACCOUNTS SELECTOR ────────────────────────── -->
+      <section class="hierarchy-level-card">
+        <div class="hierarchy-head">
+          <div>
+            <span class="hierarchy-tag level-1">Cấp Độ 1 • Accounts</span>
+            <h3 class="card-title" style="font-size: 16px;">Tài Khoản Google (Chrome Profiles)</h3>
+            <p class="card-desc" style="font-size: 12px; margin: 0;">Chọn tài khoản để xem các Dự Án (Projects) thuộc tài khoản đó</p>
           </div>
-          <button type="button" class="btn-quiet" onclick="openCreateProjectModal()" style="font-size: 12px;">+ Thêm Project</button>
+          <button type="button" class="btn-quiet" onclick="switchMainTab('profiles')" style="font-size: 12px;">
+            <span>👤 Quản lý Profiles</span>
+          </button>
+        </div>
+        <div class="accounts-filter-pills" id="accountsFilterBar">
+          <div style="color: var(--text-muted); font-size: 12px;">Đang tải danh sách tài khoản...</div>
+        </div>
+      </section>
+
+      <!-- ─── LEVEL 2: PROJECTS GRID ────────────────────────────── -->
+      <section class="hierarchy-level-card">
+        <div class="hierarchy-head">
+          <div>
+            <span class="hierarchy-tag level-2">Cấp Độ 2 • Projects</span>
+            <h3 class="card-title" style="font-size: 16px;" id="projectsHeaderTitle">Dự Án Thuộc Tài Khoản (Projects)</h3>
+            <p class="card-desc" style="font-size: 12px; margin: 0;" id="projectsHeaderDesc">Bấm "📂 Mở Không Gian Ảnh" trên card dự án để quản lý ảnh tham chiếu và ảnh đã tạo bên dưới</p>
+          </div>
+          <button type="button" class="btn-primary" onclick="openCreateProjectModal()" style="font-size: 12px;">
+            <span>➕ Tạo Project Mới</span>
+          </button>
         </div>
         <div class="projects-grid" id="projectsCardsContainer">
           <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 30px;">
@@ -1481,22 +1648,60 @@ export function getDashboardHtml(): string {
         </div>
       </section>
 
-      <!-- Section 2: Ref Assets Library -->
-      <section class="bento-card bento-full">
-        <div class="card-head">
-          <div class="card-title-group">
-            <span class="card-eyebrow">Kho Lưu Trữ Tài Nguyên</span>
-            <h3 class="card-title" style="font-size: 18px;">Thư Viện Ảnh Tham Chiếu (Reference Assets)</h3>
-            <p class="card-desc">Toàn bộ ảnh ref đã upload được lưu trữ theo SHA-256. Bấm "⚡ Dùng tạo ảnh" để đưa trực tiếp vào Studio mà không cần upload lại từ máy tính.</p>
+      <!-- ─── LEVEL 3: IMAGES WORKSPACE ─────────────────────────── -->
+      <section class="hierarchy-level-card" id="projectImagesWorkspaceCard">
+        <div class="images-workspace-header">
+          <div>
+            <span class="hierarchy-tag level-3">Cấp Độ 3 • Images</span>
+            <h3 class="card-title" style="font-size: 16px;" id="imagesWorkspaceTitle">Kho Ảnh Dự Án</h3>
+            <div class="project-breadcrumb">
+              <span id="imageBreadcrumbAccount">👤 Tất cả tài khoản</span>
+              <span style="color: var(--text-muted);">›</span>
+              <span id="imageBreadcrumbProject" class="crumb-active">📁 Dự án đang chọn</span>
+            </div>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <input type="text" id="refAssetSearchInput" class="search-input" placeholder="🔍 Tìm kiếm ảnh ref..." oninput="filterRefAssets(this.value)" />
-            <button type="button" class="btn-primary" onclick="openUploadRefAssetModal()" style="font-size: 12px;">📤 Upload Mới</button>
+          
+          <!-- Sub-tabs: Uploaded Refs vs Flow Generated Outputs -->
+          <div class="images-type-tabs">
+            <button type="button" class="images-tab-btn active" id="tabBtnUploadedRefs" onclick="switchImagesSubTab('uploaded')">
+              <span>📤 Ảnh Tham Chiếu Đã Tải Lên</span>
+              <span class="badge badge-neutral" style="font-size: 10.5px;" id="countUploadedRefs">0</span>
+            </button>
+            <button type="button" class="images-tab-btn" id="tabBtnGeneratedFlow" onclick="switchImagesSubTab('generated')">
+              <span>🎨 Ảnh Đã Tạo Trên Google Flow</span>
+              <span class="badge badge-neutral" style="font-size: 10.5px;" id="countGeneratedFlow">0</span>
+            </button>
           </div>
         </div>
-        <div class="ref-assets-grid" id="refAssetsCardsContainer">
-          <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 30px;">
-            Đang tải kho ảnh tham chiếu...
+
+        <!-- Subview A: Uploaded Ref Assets -->
+        <div id="subviewUploadedRefs" class="images-subview active">
+          <div class="images-subview-toolbar">
+            <span>Toàn bộ ảnh ref do bạn tải lên từ máy tính cho dự án này. Bấm <strong>⚡ Dùng tạo ảnh</strong> để đưa vào Studio làm ảnh mẫu I2I.</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="searchUploadedRefInput" class="search-input" placeholder="🔍 Tìm kiếm ảnh ref..." oninput="filterCurrentUploadedRefs(this.value)" />
+              <button type="button" class="btn-primary" onclick="openUploadRefAssetModal()" style="font-size: 12px;">📤 Upload Ảnh Mới</button>
+            </div>
+          </div>
+          <div class="ref-assets-grid" id="uploadedRefsCardsContainer">
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 30px;">
+              Đang tải ảnh tham chiếu...
+            </div>
+          </div>
+        </div>
+
+        <!-- Subview B: Google Flow Generated Images -->
+        <div id="subviewGeneratedFlow" class="images-subview">
+          <div class="images-subview-toolbar">
+            <span>Toàn bộ ảnh AI do Google Flow (Imagen 3) tạo ra từ các job của dự án này. Bấm <strong>🔄 Dùng làm ảnh Ref</strong> để lưu vào kho tham chiếu!</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="searchGeneratedImagesInput" class="search-input" placeholder="🔍 Tìm theo prompt..." oninput="filterCurrentGeneratedImages(this.value)" />
+            </div>
+          </div>
+          <div class="gallery-grid" id="generatedFlowCardsContainer">
+            <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 30px;">
+              Đang tải ảnh đã tạo...
+            </div>
           </div>
         </div>
       </section>
@@ -1706,6 +1911,9 @@ export function getDashboardHtml(): string {
       <div class="modal-footer" style="justify-content: center;">
         <button type="button" class="btn-quiet" onclick="closeModal('loginTrackerModal')">Thu nhỏ & Tiếp tục</button>
       </div>
+    </div>
+  </div>
+
   <!-- ─── Modal 6: Create Project ─────────────────────────────── -->
   <div id="createProjectModal" class="modal">
     <div class="modal-box">
@@ -1889,6 +2097,10 @@ export function getDashboardHtml(): string {
     let refAssetsDataCache = [];
     let selectedRefAsset = null;
     let activeLoginPollingInterval = null;
+    let selectedHierarchyAccountId = '';
+    let selectedHierarchyProjectId = '';
+    let currentImagesSubTab = 'uploaded';
+    let currentProjectImagesCache = { uploadedAssets: [], generatedImages: [] };
 
     // Theme Management
     function initTheme() {
@@ -2030,6 +2242,7 @@ export function getDashboardHtml(): string {
 
         // Update Profiles Manager view if visible
         renderProfilesManager();
+        renderAccountsFilterBar();
       } catch (e) {
         console.error('Error fetching accounts:', e);
       }
@@ -2127,23 +2340,23 @@ export function getDashboardHtml(): string {
             '<div class="profile-detail-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border);">' +
               '<span class="detail-k">Kích hoạt (Nhận Job):</span>' +
               '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600;">' +
-                '<input type="checkbox" ' + toggleChecked + ' onchange="toggleAccountEnabled(\\'' + a.id + '\\', this.checked)" />' +
+                '<input type="checkbox" ' + toggleChecked + ' onchange="toggleAccountEnabled('\'' + a.id + '\\', this.checked)" />' +
                 '<span>' + (a.enabled ? 'Đang bật' : 'Đang tắt') + '</span>' +
               '</label>' +
             '</div>' +
           '</div>' +
 
           '<div class="profile-actions-bar">' +
-            '<button type="button" class="profile-action-btn btn-login" onclick="triggerAccountLogin(\\'' + a.id + '\\', \\'' + escapeHtml(a.label) + '\\')">' +
+            '<button type="button" class="profile-action-btn btn-login" onclick="triggerAccountLogin('\'' + a.id + '\\', '\'' + escapeHtml(a.label) + '\\')">' +
               '<span>🔑 Mở Chrome Đăng Nhập</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" onclick="openEditProfileModal(\\'' + a.id + '\\')">' +
+            '<button type="button" class="profile-action-btn" onclick="openEditProfileModal('\'' + a.id + '\\')">' +
               '<span>✏️ Sửa</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" onclick="checkAccountSession(\\'' + a.id + '\\')">' +
+            '<button type="button" class="profile-action-btn" onclick="checkAccountSession('\'' + a.id + '\\')">' +
               '<span>🔄 Kiểm tra</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" style="color: var(--danger);" onclick="openDeleteProfileModal(\\'' + a.id + '\\', \\'' + escapeHtml(a.label) + '\\', \\'' + escapeHtml(a.profilePath) + '\\')">' +
+            '<button type="button" class="profile-action-btn" style="color: var(--danger);" onclick="openDeleteProfileModal('\'' + a.id + '\\', '\'' + escapeHtml(a.label) + '\\', '\'' + escapeHtml(a.profilePath) + '\\')">' +
               '<span>🗑️ Xóa</span>' +
             '</button>' +
           '</div>' +
@@ -2365,15 +2578,26 @@ export function getDashboardHtml(): string {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     }
 
-    // Projects API & Rendering
+    // ─── Hierarchy Structure: Accounts > Projects > Images ────────
     async function fetchProjects() {
       try {
         const res = await fetch('/api/projects');
         const data = await res.json();
         projectsDataCache = data.projects || [];
+
+        // Auto select first project if none currently selected
+        if (!selectedHierarchyProjectId || !projectsDataCache.some(p => p.id === selectedHierarchyProjectId)) {
+          selectedHierarchyProjectId = projectsDataCache[0]?.id || '';
+        }
+
+        renderAccountsFilterBar();
         renderProjectsList();
         updateStudioProjectSelect();
         updateProjectKPI();
+
+        if (selectedHierarchyProjectId) {
+          await loadProjectImages(selectedHierarchyProjectId);
+        }
       } catch (e) {
         console.error('Error fetching projects:', e);
       }
@@ -2382,12 +2606,75 @@ export function getDashboardHtml(): string {
     function updateProjectKPI() {
       const kpiTotal = document.getElementById('kpiTotalProjects');
       const kpiActive = document.getElementById('kpiProjectsActive');
+      const kpiFlowOutputs = document.getElementById('kpiTotalFlowOutputs');
       const navBadge = document.getElementById('navProjectsCount');
       if (kpiTotal) kpiTotal.innerText = projectsDataCache.length;
       if (navBadge) navBadge.innerText = projectsDataCache.length;
       if (kpiActive) {
-        const activeCount = projectsDataCache.filter(p => p.account_id).length;
+        const activeCount = new Set(projectsDataCache.map(p => p.account_id).filter(Boolean)).size;
         kpiActive.innerText = activeCount;
+      }
+      if (kpiFlowOutputs) {
+        const totalGen = projectsDataCache.reduce((sum, p) => sum + (p.generated_images_count || 0), 0);
+        kpiFlowOutputs.innerText = totalGen;
+      }
+    }
+
+    // ─── Level 1: Accounts Filter Chips ──────────────────────────
+    function renderAccountsFilterBar() {
+      const container = document.getElementById('accountsFilterBar');
+      if (!container) return;
+
+      const totalAccs = accountsDataCache.length;
+      let html = '';
+
+      const isAllActive = !selectedHierarchyAccountId;
+      html += '<button type="button" class="account-pill ' + (isAllActive ? 'active' : '') + '" onclick="filterProjectsByAccount(\'\')">' +
+        '<span>🌐</span>' +
+        '<span>Tất Cả Accounts</span>' +
+        '<span class="badge badge-neutral" style="font-size: 10px;">' + totalAccs + '</span>' +
+      '</button>';
+
+      for (const acc of accountsDataCache) {
+        const isActive = selectedHierarchyAccountId === acc.id;
+        const isAuthed = acc.sessionStatus === 'authenticated';
+        const dotColor = isAuthed ? 'var(--success)' : 'var(--warning)';
+        const projCount = projectsDataCache.filter(p => p.account_id === acc.id).length;
+
+        html += '<button type="button" class="account-pill ' + (isActive ? 'active' : '') + '" onclick="filterProjectsByAccount(\'' + escapeHtml(acc.id) + '\')">' +
+          '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: ' + dotColor + ';"></span>' +
+          '<span>👤 ' + escapeHtml(acc.label) + ' <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">(' + escapeHtml(acc.id) + ')</span></span>' +
+          '<span class="badge badge-neutral" style="font-size: 10px;">' + projCount + ' proj</span>' +
+        '</button>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    function filterProjectsByAccount(accId) {
+      selectedHierarchyAccountId = accId;
+      renderAccountsFilterBar();
+      renderProjectsList();
+
+      const titleEl = document.getElementById('projectsHeaderTitle');
+      const descEl = document.getElementById('projectsHeaderDesc');
+      if (accId) {
+        const acc = accountsDataCache.find(a => a.id === accId);
+        const accLabel = acc ? acc.label : accId;
+        if (titleEl) titleEl.innerText = 'Dự Án Thuộc Account: ' + accLabel;
+        if (descEl) descEl.innerText = 'Hiển thị các dự án được liên kết với Chrome Profile "' + accLabel + '"';
+
+        const matching = projectsDataCache.filter(p => p.account_id === accId);
+        if (matching.length > 0 && (!selectedHierarchyProjectId || !matching.some(p => p.id === selectedHierarchyProjectId))) {
+          selectedHierarchyProjectId = matching[0].id;
+        }
+      } else {
+        if (titleEl) titleEl.innerText = 'Tất Cả Dự Án (Projects)';
+        if (descEl) descEl.innerText = 'Bấm "📂 Mở Không Gian Ảnh" trên card dự án để quản lý ảnh tham chiếu và ảnh đã tạo bên dưới';
+      }
+
+      if (selectedHierarchyProjectId) {
+        loadProjectImages(selectedHierarchyProjectId);
       }
     }
 
@@ -2406,21 +2693,31 @@ export function getDashboardHtml(): string {
       }
     }
 
+    // ─── Level 2: Projects Cards ─────────────────────────────────
     function renderProjectsList() {
       const container = document.getElementById('projectsCardsContainer');
       if (!container) return;
-      if (projectsDataCache.length === 0) {
+
+      const filtered = selectedHierarchyAccountId
+        ? projectsDataCache.filter(p => p.account_id === selectedHierarchyAccountId)
+        : projectsDataCache;
+
+      if (filtered.length === 0) {
+        const msg = selectedHierarchyAccountId 
+          ? 'Tài khoản này chưa có project nào được liên kết.'
+          : 'Chưa có project nào trong hệ thống.';
         container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md);">' +
           '<div style="font-size: 28px; margin-bottom: 8px;">📁</div>' +
-          '<h4 style="font-size: 15px; margin-bottom: 4px;">Chưa có project nào</h4>' +
-          '<p style="font-size: 12px; margin-bottom: 12px;">Hãy tạo project đầu tiên để quản lý công việc và ảnh ref.</p>' +
+          '<h4 style="font-size: 15px; margin-bottom: 4px;">' + msg + '</h4>' +
+          '<p style="font-size: 12px; margin-bottom: 12px;">Hãy tạo project mới để liên kết với tài khoản này.</p>' +
           '<button type="button" class="btn-primary" onclick="openCreateProjectModal()">➕ Tạo Project Mới</button>' +
         '</div>';
         return;
       }
 
       let html = '';
-      for (const p of projectsDataCache) {
+      for (const p of filtered) {
+        const isSelected = p.id === selectedHierarchyProjectId;
         const boundAccount = p.account_label 
           ? '<span class="badge badge-success"><span class="badge-dot"></span> ' + escapeHtml(p.account_label) + ' (' + escapeHtml(p.account_id || '') + ')</span>'
           : '<span class="badge badge-neutral" style="font-size: 11px;">Tự do (Bất kỳ account nào)</span>';
@@ -2429,10 +2726,15 @@ export function getDashboardHtml(): string {
           ? '<a href="https://flow.google.com/project/' + escapeHtml(p.remote_project_id) + '" target="_blank" style="color: var(--primary); text-decoration: none; font-family: var(--font-mono); font-size: 11px;">' + escapeHtml(p.remote_project_id.slice(0, 18)) + '... ↗</a>'
           : '<span style="color: var(--text-subtle); font-style: italic;">Chưa cấu hình</span>';
 
-        html += '<div class="project-card" id="project-' + escapeHtml(p.id) + '">' +
+        const cardSelectedClass = isSelected ? ' active-selected' : '';
+
+        html += '<div class="project-card' + cardSelectedClass + '" id="project-' + escapeHtml(p.id) + '">' +
           '<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">' +
             '<div>' +
-              '<h4 style="font-size: 15px; font-weight: 600; color: var(--text);">' + escapeHtml(p.name) + '</h4>' +
+              '<div style="display: flex; align-items: center; gap: 6px;">' +
+                '<h4 style="font-size: 15px; font-weight: 600; color: var(--text);">' + escapeHtml(p.name) + '</h4>' +
+                (isSelected ? '<span class="badge badge-primary" style="font-size: 10px;">Đang chọn</span>' : '') +
+              '</div>' +
               '<div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px;">ID: ' + escapeHtml(p.id) + '</div>' +
             '</div>' +
             '<span class="badge badge-info" style="font-size: 11px;">' + (p.job_count || 0) + ' jobs</span>' +
@@ -2447,22 +2749,240 @@ export function getDashboardHtml(): string {
               '<span style="color: var(--text-muted); font-size: 11.5px;">Flow Remote:</span>' +
               '<div>' + remoteLink + '</div>' +
             '</div>' +
+            '<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px; padding-top: 4px; border-top: 1px dashed var(--border); font-size: 11px;">' +
+              '<span>📤 <strong>' + (p.uploaded_assets_count || 0) + '</strong> ảnh ref</span>' +
+              '<span>🎨 <strong>' + (p.generated_images_count || 0) + '</strong> ảnh tạo Flow</span>' +
+            '</div>' +
           '</div>' +
 
-          '<div style="display: flex; gap: 8px; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border);">' +
-            '<button type="button" class="btn-primary" style="flex: 1; font-size: 12px; padding: 6px;" onclick="useProjectInStudio(\\'' + escapeHtml(p.id) + '\\')">' +
-              '🎨 Dùng trong Studio' +
+          '<div style="display: flex; gap: 6px; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); flex-wrap: wrap;">' +
+            '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 6px 8px; font-weight: 600;" onclick="selectProjectForImages(\'' + escapeHtml(p.id) + '\')">' +
+              '📂 Mở Kho Ảnh' +
             '</button>' +
-            '<button type="button" class="btn-quiet" style="font-size: 12px; padding: 6px 10px;" onclick="openEditProjectModal(\\'' + escapeHtml(p.id) + '\\')">' +
-              '✏️ Sửa' +
+            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="useProjectInStudio(\'' + escapeHtml(p.id) + '\')" title="Dùng tạo ảnh trong Studio">' +
+              '🎨 Studio' +
             '</button>' +
-            '<button type="button" class="btn-danger-quiet" style="font-size: 12px; padding: 6px 10px;" onclick="openDeleteProjectModal(\\'' + escapeHtml(p.id) + '\\', \\'' + escapeHtml(p.name) + '\\')">' +
+            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="openEditProjectModal(\'' + escapeHtml(p.id) + '\')" title="Sửa project">' +
+              '✏️' +
+            '</button>' +
+            '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="openDeleteProjectModal(\'' + escapeHtml(p.id) + '\', \'' + escapeHtml(p.name) + '\')" title="Xóa project">' +
               '🗑️' +
             '</button>' +
           '</div>' +
         '</div>';
       }
       container.innerHTML = html;
+    }
+
+    function selectProjectForImages(projectId) {
+      selectedHierarchyProjectId = projectId;
+      renderProjectsList();
+      loadProjectImages(projectId);
+      const card = document.getElementById('projectImagesWorkspaceCard');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    // ─── Level 3: Images Workspace ───────────────────────────────
+    function switchImagesSubTab(tab) {
+      currentImagesSubTab = tab;
+      const btnUploaded = document.getElementById('tabBtnUploadedRefs');
+      const btnGenerated = document.getElementById('tabBtnGeneratedFlow');
+      const subviewUploaded = document.getElementById('subviewUploadedRefs');
+      const subviewGenerated = document.getElementById('subviewGeneratedFlow');
+
+      if (tab === 'uploaded') {
+        if (btnUploaded) btnUploaded.classList.add('active');
+        if (btnGenerated) btnGenerated.classList.remove('active');
+        if (subviewUploaded) subviewUploaded.classList.add('active');
+        if (subviewGenerated) subviewGenerated.classList.remove('active');
+      } else {
+        if (btnUploaded) btnUploaded.classList.remove('active');
+        if (btnGenerated) btnGenerated.classList.add('active');
+        if (subviewUploaded) subviewUploaded.classList.remove('active');
+        if (subviewGenerated) subviewGenerated.classList.add('active');
+      }
+    }
+
+    async function loadProjectImages(projectId) {
+      if (!projectId) {
+        renderProjectImagesUI();
+        return;
+      }
+
+      const p = projectsDataCache.find(x => x.id === projectId) || projectsDataCache[0];
+      if (p) {
+        const titleEl = document.getElementById('imagesWorkspaceTitle');
+        const projCrumb = document.getElementById('imageBreadcrumbProject');
+        const accCrumb = document.getElementById('imageBreadcrumbAccount');
+
+        if (titleEl) titleEl.innerText = 'Kho Ảnh Dự Án: ' + p.name;
+        if (projCrumb) projCrumb.innerText = '📁 ' + p.name + ' (' + p.id + ')';
+        if (accCrumb) {
+          const acc = accountsDataCache.find(a => a.id === p.account_id);
+          accCrumb.innerText = acc ? ('👤 ' + acc.label + ' (' + acc.id + ')') : '👤 Chưa chỉ định account';
+        }
+      }
+
+      try {
+        const res = await fetch('/api/projects/' + encodeURIComponent(projectId) + '/images');
+        const data = await res.json();
+        currentProjectImagesCache = {
+          uploadedAssets: data.uploadedAssets || [],
+          generatedImages: data.generatedImages || [],
+        };
+        renderProjectImagesUI();
+      } catch (err) {
+        console.error('Error loading project images:', err);
+      }
+    }
+
+    function renderProjectImagesUI() {
+      const uploaded = currentProjectImagesCache.uploadedAssets || [];
+      const generated = currentProjectImagesCache.generatedImages || [];
+
+      const countUpEl = document.getElementById('countUploadedRefs');
+      const countGenEl = document.getElementById('countGeneratedFlow');
+      if (countUpEl) countUpEl.innerText = uploaded.length;
+      if (countGenEl) countGenEl.innerText = generated.length;
+
+      renderUploadedRefsCards(uploaded);
+      renderGeneratedFlowCards(generated);
+    }
+
+    function renderUploadedRefsCards(assets) {
+      const container = document.getElementById('uploadedRefsCardsContainer');
+      if (!container) return;
+
+      if (assets.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md);">' +
+          '<div style="font-size: 28px; margin-bottom: 8px;">📷</div>' +
+          '<h4 style="font-size: 15px; margin-bottom: 4px;">Chưa có ảnh tham chiếu nào được tải lên cho dự án này</h4>' +
+          '<p style="font-size: 12px; margin-bottom: 12px;">Tải ảnh ref từ máy tính lên để dùng làm ảnh mẫu cho chế độ I2I.</p>' +
+          '<button type="button" class="btn-primary" onclick="openUploadRefAssetModal()">📤 Upload Ảnh Tham Chiếu</button>' +
+        '</div>';
+        return;
+      }
+
+      let html = '';
+      for (const a of assets) {
+        const name = a.displayName || a.display_name || a.id;
+        const sizeStr = formatBytes(a.size_bytes || a.sizeBytes);
+        const shaPrefix = a.content_hash ? a.content_hash.slice(0, 10) : '';
+        const usedCount = a.usedInJobsCount || a.used_in_jobs_count || 0;
+
+        html += '<div class="ref-asset-card" id="asset-card-' + escapeHtml(a.id) + '">' +
+          '<div class="ref-asset-thumb-wrap">' +
+            '<img src="' + escapeHtml(a.blobUrl) + '" class="ref-asset-thumb preview-clickable" data-url="' + escapeHtml(a.blobUrl) + '" data-prompt="Reference: ' + escapeHtml(name) + '" alt="Ref" />' +
+            '<span class="badge badge-neutral" style="position: absolute; bottom: 6px; right: 6px; font-size: 10px; background: rgba(0,0,0,0.6); color: #fff; border: none;">' + sizeStr + '</span>' +
+          '</div>' +
+          '<div class="ref-asset-body">' +
+            '<strong style="font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong>' +
+            '<div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">' +
+              '<span style="font-family: var(--font-mono);">#' + escapeHtml(shaPrefix) + '</span>' +
+              '<span class="badge ' + (usedCount > 0 ? 'badge-success' : 'badge-neutral') + '" style="font-size: 10px;">' + usedCount + ' jobs</span>' +
+            '</div>' +
+            '<div style="display: flex; gap: 6px; margin-top: auto; padding-top: 6px; border-top: 1px solid var(--border);">' +
+              '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 5px 8px;" onclick="selectAssetForStudio('\'' + escapeHtml(a.id) + '\\')">' +
+                '⚡ Dùng tạo ảnh' +
+              '</button>' +
+              '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 5px 8px;" onclick="deleteRefAsset('\'' + escapeHtml(a.id) + '\\')">' +
+                '🗑️' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function renderGeneratedFlowCards(generated) {
+      const container = document.getElementById('generatedFlowCardsContainer');
+      if (!container) return;
+
+      if (generated.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md);">' +
+          '<div style="font-size: 28px; margin-bottom: 8px;">🎨</div>' +
+          '<h4 style="font-size: 15px; margin-bottom: 4px;">Chưa có ảnh nào được tạo trên Google Flow trong dự án này</h4>' +
+          '<p style="font-size: 12px; margin-bottom: 12px;">Chuyển sang Studio Sáng Tạo để gửi yêu cầu tạo ảnh T2I hoặc I2I.</p>' +
+          '<button type="button" class="btn-primary" onclick="useProjectInStudio('\'' + escapeHtml(selectedHierarchyProjectId) + '\\')">🎨 Mở Studio Tạo Ảnh</button>' +
+        '</div>';
+        return;
+      }
+
+      let html = '';
+      for (const g of generated) {
+        const cleanPrompt = escapeHtml(g.prompt || '');
+        const dateStr = g.created_at ? new Date(g.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+        const assetId = g.asset_id || '';
+
+        html += '<div class="gallery-card" style="aspect-ratio: 16/11;">' +
+          '<img src="' + escapeHtml(g.imageUrl) + '" class="preview-clickable" data-url="' + escapeHtml(g.imageUrl) + '" data-prompt="' + cleanPrompt + '" alt="Output" />' +
+          '<div class="gallery-card-overlay">' +
+            '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+              '<span class="badge badge-success" style="font-size: 10px;">Imagen 3</span>' +
+              '<span style="font-size: 10px; color: rgba(255,255,255,0.8);">' + dateStr + '</span>' +
+            '</div>' +
+            '<div style="margin-top: auto;">' +
+              '<p class="prompt-preview" style="color: #fff; font-size: 11px; margin-bottom: 6px;">' + cleanPrompt + '</p>' +
+              '<div style="display: flex; gap: 4px; flex-wrap: wrap;">' +
+                '<button type="button" class="btn-quiet btn-reuse-prompt" data-prompt="' + cleanPrompt + '" style="padding: 3px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4);">⚡ Prompt</button>' +
+                '<a href="' + escapeHtml(g.imageUrl) + '" download="flow-image.png" class="btn-quiet" style="padding: 3px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4); text-decoration: none;">⬇ PNG</a>' +
+                '<button type="button" class="btn-primary" style="padding: 3px 8px; font-size: 10px;" onclick="importGeneratedAsRef(selectedHierarchyProjectId, '' + escapeHtml(assetId) + '')"\\'") + '\\')">🔄 Dùng làm ảnh Ref</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function filterCurrentUploadedRefs(q) {
+      const query = (q || '').toLowerCase().trim();
+      const allRefs = currentProjectImagesCache.uploadedAssets || [];
+      const filtered = allRefs.filter(a => {
+        const name = (a.displayName || a.display_name || a.id || '').toLowerCase();
+        const hash = (a.content_hash || a.sha256 || '').toLowerCase();
+        return name.includes(query) || hash.includes(query);
+      });
+      renderUploadedRefsCards(filtered);
+    }
+
+    function filterCurrentGeneratedImages(q) {
+      const query = (q || '').toLowerCase().trim();
+      const allGen = currentProjectImagesCache.generatedImages || [];
+      const filtered = allGen.filter(g => {
+        const prompt = (g.prompt || '').toLowerCase();
+        const jobId = (g.job_id || '').toLowerCase();
+        return prompt.includes(query) || jobId.includes(query);
+      });
+      renderGeneratedFlowCards(filtered);
+    }
+
+    async function importGeneratedAsRef(projectId, assetId) {
+      if (!projectId || !assetId) return;
+      try {
+        const item = (currentProjectImagesCache.generatedImages || []).find(g => g.asset_id === assetId);
+        const prompt = item ? item.prompt : '';
+        const displayName = prompt ? ('Ref: ' + prompt.slice(0, 30)) : ('Ref từ ảnh ' + assetId.slice(-6));
+        const res = await fetch('/api/projects/' + encodeURIComponent(projectId) + '/import-output', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ assetId, displayName }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('✅ Đã lưu ảnh vào Thư viện Ảnh Tham Chiếu (Reference) của dự án! Bạn có thể chọn ảnh này làm input I2I ngay.');
+          await loadProjectImages(projectId);
+          await fetchAssets();
+          await fetchProjects();
+        } else {
+          alert('Không thể lưu ảnh ref: ' + (data.error || 'Lỗi'));
+        }
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      }
     }
 
     function useProjectInStudio(projectId) {
@@ -2591,10 +3111,9 @@ export function getDashboardHtml(): string {
     // Ref Assets API & Library
     async function fetchAssets() {
       try {
-        const res = await fetch('/api/assets');
+        const res = await fetch('/api/assets?type=uploaded');
         const data = await res.json();
         refAssetsDataCache = data.assets || [];
-        renderRefAssetsList(refAssetsDataCache);
         updateRefAssetsKPI();
         renderModalRefAssets(refAssetsDataCache);
       } catch (e) {
@@ -2604,69 +3123,9 @@ export function getDashboardHtml(): string {
 
     function updateRefAssetsKPI() {
       const kpiTotal = document.getElementById('kpiTotalRefAssets');
-      const kpiUsed = document.getElementById('kpiRefUsedJobs');
       const badge = document.getElementById('refLibraryCountBadge');
       if (kpiTotal) kpiTotal.innerText = refAssetsDataCache.length;
       if (badge) badge.innerText = refAssetsDataCache.length;
-      if (kpiUsed) {
-        const totalUsed = refAssetsDataCache.reduce((sum, a) => sum + (a.usedInJobsCount || 0), 0);
-        kpiUsed.innerText = totalUsed;
-      }
-    }
-
-    function renderRefAssetsList(assets) {
-      const container = document.getElementById('refAssetsCardsContainer');
-      if (!container) return;
-      if (assets.length === 0) {
-        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-md);">' +
-          '<div style="font-size: 28px; margin-bottom: 8px;">📷</div>' +
-          '<h4 style="font-size: 15px; margin-bottom: 4px;">Chưa có ảnh tham chiếu nào trong kho</h4>' +
-          '<p style="font-size: 12px; margin-bottom: 12px;">Tải ảnh ref lên kho để tái sử dụng nhiều lần mà không lo trùng lặp.</p>' +
-          '<button type="button" class="btn-primary" onclick="openUploadRefAssetModal()">📤 Tải Ref Asset Lên Kho</button>' +
-        '</div>';
-        return;
-      }
-
-      let html = '';
-      for (const a of assets) {
-        const name = a.displayName || a.id;
-        const sizeStr = formatBytes(a.sizeBytes);
-        const shaPrefix = a.sha256 ? a.sha256.slice(0, 10) : '';
-        const usedCount = a.usedInJobsCount || 0;
-
-        html += '<div class="ref-asset-card" id="asset-card-' + escapeHtml(a.id) + '">' +
-          '<div class="ref-asset-thumb-wrap">' +
-            '<img src="' + escapeHtml(a.blobUrl) + '" class="ref-asset-thumb preview-clickable" data-url="' + escapeHtml(a.blobUrl) + '" data-prompt="Reference Image: ' + escapeHtml(name) + '" alt="Ref Asset" />' +
-            '<span class="badge badge-neutral" style="position: absolute; bottom: 6px; right: 6px; font-size: 10px; background: rgba(0,0,0,0.6); color: #fff; border: none;">' + sizeStr + '</span>' +
-          '</div>' +
-          '<div class="ref-asset-body">' +
-            '<strong style="font-size: 12.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</strong>' +
-            '<div style="font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;">' +
-              '<span style="font-family: var(--font-mono);">#' + escapeHtml(shaPrefix) + '</span>' +
-              '<span class="badge ' + (usedCount > 0 ? 'badge-success' : 'badge-neutral') + '" style="font-size: 10px;">' + usedCount + ' jobs</span>' +
-            '</div>' +
-            '<div style="display: flex; gap: 6px; margin-top: auto; padding-top: 6px; border-top: 1px solid var(--border);">' +
-              '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 5px 8px;" onclick="selectAssetForStudio(\\'' + escapeHtml(a.id) + '\\')">' +
-                '⚡ Dùng tạo ảnh' +
-              '</button>' +
-              '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 5px 8px;" onclick="deleteRefAsset(\\'' + escapeHtml(a.id) + '\\')">' +
-                '🗑️' +
-              '</button>' +
-            '</div>' +
-          '</div>' +
-        '</div>';
-      }
-      container.innerHTML = html;
-    }
-
-    function filterRefAssets(q) {
-      const query = (q || '').toLowerCase().trim();
-      const filtered = refAssetsDataCache.filter(a => 
-        (a.displayName && a.displayName.toLowerCase().includes(query)) ||
-        (a.id && a.id.toLowerCase().includes(query)) ||
-        (a.sha256 && a.sha256.toLowerCase().includes(query))
-      );
-      renderRefAssetsList(filtered);
     }
 
     function renderModalRefAssets(assets) {
@@ -2681,7 +3140,7 @@ export function getDashboardHtml(): string {
       for (const a of assets) {
         const name = a.displayName || a.id;
         const sizeStr = formatBytes(a.sizeBytes);
-        html += '<div class="ref-asset-card" style="cursor: pointer;" onclick="selectAssetForStudio(\\'' + escapeHtml(a.id) + '\\'); closeModal(\\'selectRefAssetModal\\');">' +
+        html += '<div class="ref-asset-card" style="cursor: pointer;" onclick="selectAssetForStudio(\'' + escapeHtml(a.id) + '\'); closeModal(\'selectRefAssetModal\');">' +
           '<div class="ref-asset-thumb-wrap" style="height: 110px;">' +
             '<img src="' + escapeHtml(a.blobUrl) + '" class="ref-asset-thumb" alt="Ref" />' +
           '</div>' +
@@ -2780,6 +3239,9 @@ export function getDashboardHtml(): string {
           opts += '<option value="' + escapeHtml(p.id) + '">' + escapeHtml(p.name) + '</option>';
         }
         projSelect.innerHTML = opts;
+        if (selectedHierarchyProjectId && projectsDataCache.some(p => p.id === selectedHierarchyProjectId)) {
+          projSelect.value = selectedHierarchyProjectId;
+        }
       }
       document.getElementById('uploadRefAssetFile').value = '';
       document.getElementById('uploadRefAssetDisplayName').value = '';
@@ -2815,6 +3277,10 @@ export function getDashboardHtml(): string {
             alert('ℹ️ Ảnh này đã tồn tại trong kho (SHA-256 trùng khớp)! Hệ thống đã tự động liên kết và cập nhật tên hiển thị để tránh trùng lặp.');
           }
           await fetchAssets();
+          await fetchProjects();
+          if (selectedHierarchyProjectId) {
+            await loadProjectImages(selectedHierarchyProjectId);
+          }
         } else {
           alert('Không thể upload ảnh: ' + (data.error || 'Lỗi'));
         }
@@ -2836,6 +3302,10 @@ export function getDashboardHtml(): string {
             clearSelectedRefAsset();
           }
           await fetchAssets();
+          await fetchProjects();
+          if (selectedHierarchyProjectId) {
+            await loadProjectImages(selectedHierarchyProjectId);
+          }
         } else {
           alert('Không thể xóa asset: ' + (data.error || 'Lỗi'));
         }

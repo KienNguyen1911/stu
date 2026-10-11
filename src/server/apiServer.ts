@@ -227,31 +227,36 @@ export class ApiServer {
                   .run(result.email || null, now, accId);
 
                 if (result.remoteProjectId) {
-                  const defaultProjId = "proj-default";
+                  const targetProjId = `proj-${accId}`;
+                  const accRow = this.db.db
+                    .prepare("SELECT label FROM accounts WHERE id = ?")
+                    .get(accId) as { label: string } | undefined;
+                  const label = accRow?.label || accId;
+
                   this.db.db
                     .prepare(
                       `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
-                       VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+                       VALUES (?, ?, ?, ?, ?)`,
                     )
-                    .run(defaultProjId, now, now);
+                    .run(targetProjId, `Dự án Flow - ${label}`, `Tài khoản ${label}`, now, now);
 
                   const existingBinding = this.db.db
                     .prepare(
                       `SELECT id FROM project_bindings 
-                       WHERE project_id = ? AND account_id = ? AND archived_at IS NULL`,
+                       WHERE account_id = ? AND archived_at IS NULL`,
                     )
-                    .get(defaultProjId, accId) as { id: string } | undefined;
+                    .get(accId) as { id: string } | undefined;
 
                   if (existingBinding) {
                     this.db.db
                       .prepare(
                         `UPDATE project_bindings 
-                         SET remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
+                         SET project_id = ?, remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
                          WHERE id = ?`,
                       )
-                      .run(result.remoteProjectId, now, now, existingBinding.id);
+                      .run(targetProjId, result.remoteProjectId, now, now, existingBinding.id);
                   } else {
-                    const bindingId = `bind-${accId}-${defaultProjId}`;
+                    const bindingId = `bind-${accId}-${targetProjId}`;
                     this.db.db
                       .prepare(
                         `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
@@ -259,7 +264,7 @@ export class ApiServer {
                       )
                       .run(
                         bindingId,
-                        defaultProjId,
+                        targetProjId,
                         accId,
                         result.remoteProjectId,
                         now,
@@ -353,22 +358,33 @@ export class ApiServer {
 
       // 3. Projects & Bindings
       if (method === "GET" && pathname === "/api/projects") {
-        const projects = this.db.db
-          .prepare(`
-            SELECT p.*,
-                   COUNT(DISTINCT j.id) as job_count,
-                   b.id as binding_id,
-                   b.account_id,
-                   a.label as account_label,
-                   b.remote_project_id
-            FROM projects p
-            LEFT JOIN jobs j ON p.id = j.project_id
-            LEFT JOIN project_bindings b ON p.id = b.project_id AND b.archived_at IS NULL
-            LEFT JOIN accounts a ON b.account_id = a.id
-            GROUP BY p.id
-            ORDER BY p.created_at DESC
-          `)
-          .all() as any[];
+        const urlObj = new URL(req.url || "/", "http://localhost");
+        const accountFilter = urlObj.searchParams.get("accountId");
+
+        let sql = `
+          SELECT p.*,
+                 b.id as binding_id,
+                 b.account_id,
+                 a.label as account_label,
+                 b.remote_project_id,
+                 (SELECT COUNT(DISTINCT id) FROM jobs WHERE project_id = p.id) as job_count,
+                 (SELECT COUNT(DISTINCT asset_id) FROM project_assets WHERE project_id = p.id) as uploaded_assets_count,
+                 (SELECT COUNT(DISTINCT jo.id) FROM jobs j JOIN job_attempts ja ON j.id = ja.job_id JOIN job_outputs jo ON ja.id = jo.attempt_id WHERE j.project_id = p.id AND jo.local_asset_id IS NOT NULL) as generated_images_count
+          FROM projects p
+          LEFT JOIN project_bindings b ON p.id = b.project_id AND b.archived_at IS NULL
+          LEFT JOIN accounts a ON b.account_id = a.id
+          WHERE p.archived_at IS NULL
+        `;
+
+        const params: any[] = [];
+        if (accountFilter) {
+          sql += ` AND b.account_id = ?`;
+          params.push(accountFilter);
+        }
+
+        sql += ` ORDER BY p.created_at DESC`;
+
+        const projects = this.db.db.prepare(sql).all(...params) as any[];
         const bindings = this.db.db
           .prepare("SELECT * FROM project_bindings WHERE archived_at IS NULL")
           .all() as any[];
@@ -407,6 +423,80 @@ export class ApiServer {
         });
         const createdProject = this.db.db.prepare("SELECT * FROM projects WHERE id = ?").get(projId);
         return this.sendJson(res, 201, { project: createdProject, projectId: projId, name: body.name });
+      }
+
+      const projectImagesMatch = pathname.match(/^\/api\/projects\/([^/]+)\/images$/);
+      if (projectImagesMatch) {
+        const projId = projectImagesMatch[1]!;
+
+        if (method === "GET") {
+          // 1. Uploaded reference assets for this project
+          const uploadedAssetsRaw = this.db.db
+            .prepare(`
+              SELECT a.id, a.content_hash, a.blob_key, a.mime_type, a.size_bytes, a.created_at,
+                     COALESCE(pa.display_name, 'Ảnh tham chiếu ' || SUBSTR(a.id, -6)) as display_name,
+                     pa.project_id,
+                     (SELECT COUNT(DISTINCT ji.job_id) FROM job_inputs ji WHERE ji.asset_id = a.id) as used_in_jobs_count
+              FROM assets a
+              LEFT JOIN project_assets pa ON a.id = pa.asset_id
+              WHERE (pa.project_id = ? OR a.id IN (SELECT ji.asset_id FROM job_inputs ji JOIN jobs j ON ji.job_id = j.id WHERE j.project_id = ?))
+                AND a.id NOT IN (SELECT local_asset_id FROM job_outputs WHERE local_asset_id IS NOT NULL)
+              ORDER BY a.created_at DESC
+            `)
+            .all(projId, projId) as any[];
+
+          const uploadedAssets = uploadedAssetsRaw.map(a => ({
+            ...a,
+            blobUrl: `/api/assets/${a.id}/blob`,
+            imageUrl: `/api/assets/${a.id}/blob`,
+            usedInJobsCount: Number(a.used_in_jobs_count || 0),
+          }));
+
+          // 2. Generated images created by Google Flow jobs in this project
+          const generatedImagesRaw = this.db.db
+            .prepare(`
+              SELECT jo.id as output_id, jo.position, jo.remote_url, jo.created_at,
+                     a.id as asset_id, a.size_bytes, a.content_hash,
+                     j.id as job_id, j.prompt, j.status as job_status
+              FROM jobs j
+              JOIN job_attempts ja ON j.id = ja.job_id
+              JOIN job_outputs jo ON ja.id = jo.attempt_id
+              JOIN assets a ON jo.local_asset_id = a.id
+              WHERE j.project_id = ?
+              ORDER BY jo.created_at DESC
+            `)
+            .all(projId) as any[];
+
+          const generatedImages = generatedImagesRaw.map(g => ({
+            ...g,
+            blobUrl: `/api/assets/${g.asset_id}/blob`,
+            imageUrl: `/api/assets/${g.asset_id}/blob`,
+          }));
+
+          return this.sendJson(res, 200, {
+            projectId: projId,
+            uploadedAssets,
+            generatedImages,
+          });
+        }
+      }
+
+      const projectImportMatch = pathname.match(/^\/api\/projects\/([^/]+)\/import-output$/);
+      if (method === "POST" && projectImportMatch) {
+        const projId = projectImportMatch[1]!;
+        const body = await this.readJsonBody(req);
+        if (!body.assetId) {
+          return this.sendJson(res, 400, { error: "Missing 'assetId'" });
+        }
+        const now = new Date().toISOString();
+        const displayName = body.displayName || `Ref từ ảnh tạo ${body.assetId.slice(-6)}`;
+        this.db.db
+          .prepare(
+            `INSERT OR REPLACE INTO project_assets (project_id, asset_id, display_name, created_at)
+             VALUES (?, ?, ?, ?)`
+          )
+          .run(projId, body.assetId, displayName, now);
+        return this.sendJson(res, 200, { success: true, projectId: projId, assetId: body.assetId, displayName });
       }
 
       const projectItemMatch = pathname.match(/^\/api\/projects\/([^/]+)$/);
@@ -516,18 +606,41 @@ export class ApiServer {
 
       // 4. Asset Ingestion & Blobs
       if (method === "GET" && pathname === "/api/assets") {
-        const assets = this.db.db
-          .prepare(`
-            SELECT a.id, a.content_hash, a.blob_key, a.mime_type, a.size_bytes, a.created_at,
-                   COUNT(DISTINCT ji.job_id) as used_in_jobs_count,
-                   pa.display_name, pa.project_id
-            FROM assets a
-            LEFT JOIN job_inputs ji ON a.id = ji.asset_id
-            LEFT JOIN project_assets pa ON a.id = pa.asset_id
-            GROUP BY a.id
-            ORDER BY a.created_at DESC
-          `)
-          .all() as any[];
+        const typeFilter = reqUrl.searchParams.get("type"); // 'uploaded' | 'generated'
+        const projFilter = reqUrl.searchParams.get("projectId");
+
+        let whereClause = "";
+        const conditions: string[] = [];
+        const params: any[] = [];
+
+        if (typeFilter === "uploaded") {
+          conditions.push("a.id NOT IN (SELECT local_asset_id FROM job_outputs WHERE local_asset_id IS NOT NULL)");
+        } else if (typeFilter === "generated") {
+          conditions.push("a.id IN (SELECT local_asset_id FROM job_outputs WHERE local_asset_id IS NOT NULL)");
+        }
+
+        if (projFilter) {
+          conditions.push("(pa.project_id = ? OR a.id IN (SELECT ji.asset_id FROM job_inputs ji JOIN jobs j ON ji.job_id = j.id WHERE j.project_id = ?))");
+          params.push(projFilter, projFilter);
+        }
+
+        if (conditions.length > 0) {
+          whereClause = "WHERE " + conditions.join(" AND ");
+        }
+
+        const query = `
+          SELECT a.id, a.content_hash, a.blob_key, a.mime_type, a.size_bytes, a.created_at,
+                 COUNT(DISTINCT ji.job_id) as used_in_jobs_count,
+                 pa.display_name, pa.project_id
+          FROM assets a
+          LEFT JOIN job_inputs ji ON a.id = ji.asset_id
+          LEFT JOIN project_assets pa ON a.id = pa.asset_id
+          ${whereClause}
+          GROUP BY a.id
+          ORDER BY a.created_at DESC
+        `;
+
+        const assets = this.db.db.prepare(query).all(...params) as any[];
 
         const enriched = assets.map(a => ({
           ...a,
