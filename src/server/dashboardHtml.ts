@@ -109,31 +109,40 @@ export function getDashboardHtml(): string {
       transition: background-color var(--motion-normal) ease, color var(--motion-normal) ease;
     }
 
-    .container {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: var(--space-xl) var(--space-lg);
+    /* ─── App Shell & Sidebar Layout ─────────────────────────── */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+      background-color: var(--bg);
     }
 
-    /* ─── App Header ─────────────────────────────────────────── */
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: var(--space-lg);
-      margin-bottom: var(--space-md);
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-      gap: var(--space-md);
-    }
-    .brand-wrap {
+    .app-sidebar {
+      width: 250px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      padding: var(--space-lg);
+      gap: var(--space-md);
+      overflow-y: auto;
+      z-index: 50;
+      box-shadow: 1px 0 3px rgba(0,0,0,0.02);
+    }
+
+    .sidebar-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: var(--space-md);
+      border-bottom: 1px solid var(--border);
     }
     .brand-title {
       font-family: var(--font-serif);
-      font-size: 26px;
+      font-size: 21px;
       font-weight: 600;
       letter-spacing: -0.02em;
       color: var(--text);
@@ -142,55 +151,50 @@ export function getDashboardHtml(): string {
       gap: var(--space-sm);
     }
     .brand-subtitle {
-      font-size: 13px;
+      font-size: 11.5px;
       color: var(--text-muted);
-    }
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
+      line-height: 1.3;
     }
 
-    /* ─── Nav Tabs ───────────────────────────────────────────── */
-    .nav-tabs-bar {
+    .sidebar-nav {
       display: flex;
-      gap: 8px;
-      background: var(--surface-muted);
-      padding: 4px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
-      margin-bottom: var(--space-xl);
-      width: fit-content;
+      flex-direction: column;
+      gap: 6px;
     }
     .nav-tab-btn {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
+      justify-content: flex-start;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 14px;
       border-radius: var(--radius-sm);
-      border: none;
+      border: 1px solid transparent;
       background: transparent;
       color: var(--text-muted);
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
+      text-align: left;
       transition: all var(--motion-fast) ease;
     }
     .nav-tab-btn:hover {
       color: var(--text);
+      background: var(--surface-muted);
     }
     .nav-tab-btn.active {
-      background: var(--surface);
+      background: var(--surface-muted);
       color: var(--text);
       font-weight: 600;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border-color: var(--border);
     }
     .nav-tab-badge {
+      margin-left: auto;
       font-size: 11px;
       font-weight: 600;
-      padding: 1px 6px;
+      padding: 1px 7px;
       border-radius: 10px;
-      background: var(--surface-muted);
+      background: var(--surface);
       color: var(--text-muted);
       border: 1px solid var(--border);
     }
@@ -198,6 +202,78 @@ export function getDashboardHtml(): string {
       background: var(--primary);
       color: var(--primary-fg);
       border-color: var(--primary);
+    }
+
+    /* System Quick Metrics in Sidebar */
+    .sidebar-widget {
+      margin-top: auto;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .widget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      color: var(--text-subtle);
+    }
+    .widget-link {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+    .widget-link:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+    .widget-metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .widget-metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .widget-metric-lbl {
+      color: var(--text-muted);
+    }
+    .widget-metric-val {
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--text);
+    }
+
+    .sidebar-footer {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      padding-top: var(--space-sm);
+      border-top: 1px solid var(--border);
+    }
+    .sidebar-btn-theme {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Main Workspace */
+    .app-main {
+      flex: 1;
+      min-width: 0;
+      padding: var(--space-xl) var(--space-xxl);
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
     }
 
     .tab-view {
@@ -214,15 +290,6 @@ export function getDashboardHtml(): string {
     }
 
     /* ─── Bento Cards ────────────────────────────────────────── */
-    .bento-grid {
-      display: grid;
-      grid-template-columns: 8fr 4fr;
-      gap: var(--space-lg);
-      margin-bottom: var(--space-xl);
-    }
-    @media (max-width: 960px) {
-      .bento-grid { grid-template-columns: 1fr; }
-    }
     .bento-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -233,17 +300,123 @@ export function getDashboardHtml(): string {
       flex-direction: column;
       position: relative;
     }
-    .bento-hero {
-      position: relative;
-      overflow: hidden;
-    }
-    .bento-side {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-lg);
-    }
     .bento-full {
       width: 100%;
+    }
+
+    /* ─── Studio 2-Column Grid ─────────────────────────────── */
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .studio-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .studio-console-card {
+      padding: var(--space-xl);
+    }
+    .studio-preview-card {
+      padding: var(--space-xl);
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+    }
+    .studio-showcase-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      background: var(--surface-muted);
+      margin-top: var(--space-sm);
+      min-height: 280px;
+    }
+    .showcase-empty {
+      text-align: center;
+      max-width: 280px;
+    }
+    .showcase-empty-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .showcase-empty-title {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .showcase-empty-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .showcase-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .showcase-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .showcase-img-wrap {
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      text-align: center;
+      max-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .showcase-img {
+      max-width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      cursor: pointer;
+    }
+    .showcase-prompt {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (max-width: 900px) {
+      .app-shell {
+        flex-direction: column;
+      }
+      .app-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: var(--space-md);
+      }
+      .sidebar-nav {
+        flex-direction: row;
+      }
+      .sidebar-widget {
+        display: none;
+      }
+      .app-main {
+        padding: var(--space-lg) var(--space-md);
+      }
     }
 
     .card-head {
@@ -899,165 +1072,169 @@ export function getDashboardHtml(): string {
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- App Header -->
-    <header class="app-header">
-      <div class="brand-wrap">
+  <div class="app-shell">
+    <!-- Left Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-brand">
         <h1 class="brand-title">
           <span>Flow Studio Core</span>
-          <span class="badge badge-success"><span class="badge-dot"></span> Online</span>
         </h1>
-        <span class="brand-subtitle">Hệ thống sinh ảnh tự động & Quản lý Chrome Profiles Google Flow</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="badge badge-success"><span class="badge-dot"></span> Online</span>
+          <span class="brand-subtitle">Google Flow Engine</span>
+        </div>
       </div>
-      <div class="header-actions">
-        <button id="themeToggleBtn" class="btn-quiet" title="Chuyển chế độ Sáng / Tối" onclick="toggleTheme()">
+
+      <!-- Navigation Tabs -->
+      <nav class="sidebar-nav">
+        <button type="button" class="nav-tab-btn active" id="tabBtnStudio" onclick="switchMainTab('studio')">
+          <span>🎨</span>
+          <span>Studio Sáng Tạo</span>
+        </button>
+        <button type="button" class="nav-tab-btn" id="tabBtnProfiles" onclick="switchMainTab('profiles')">
+          <span>👤</span>
+          <span>Chrome Profiles</span>
+          <span class="nav-tab-badge" id="navProfilesCount">0</span>
+        </button>
+      </nav>
+
+      <!-- System Quick Metrics in Sidebar -->
+      <div class="sidebar-widget">
+        <div class="widget-header">
+          <span>Hệ thống</span>
+          <a href="/api/health" target="_blank" class="widget-link" title="Kiểm tra trạng thái REST API">/api/health ↗</a>
+        </div>
+        <div class="widget-metrics">
+          <div class="widget-metric-row">
+            <span class="widget-metric-lbl">Hàng đợi</span>
+            <span class="widget-metric-val" id="metricQueueCount">0</span>
+          </div>
+          <div class="widget-metric-row">
+            <span class="widget-metric-lbl">Tài khoản</span>
+            <span class="widget-metric-val" id="metricAccountsCount">0/0</span>
+          </div>
+          <div class="widget-metric-row">
+            <span class="widget-metric-lbl">Ảnh đã tạo</span>
+            <span class="widget-metric-val" id="metricGalleryCount">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer: Theme Toggle -->
+      <div class="sidebar-footer">
+        <button id="themeToggleBtn" class="btn-quiet sidebar-btn-theme" title="Chuyển chế độ Sáng / Tối" onclick="toggleTheme()">
           <span id="themeIcon">☀</span> <span id="themeLabel">Chế độ Sáng</span>
         </button>
-        <a href="/api/health" target="_blank" class="btn-quiet" title="Kiểm tra trạng thái REST API">
-          <span>/api/health</span> ↗
-        </a>
       </div>
-    </header>
+    </aside>
 
-    <!-- Top Navigation Tabs -->
-    <nav class="nav-tabs-bar">
-      <button type="button" class="nav-tab-btn active" id="tabBtnStudio" onclick="switchMainTab('studio')">
-        <span>🎨 Studio Tạo Ảnh</span>
-      </button>
-      <button type="button" class="nav-tab-btn" id="tabBtnProfiles" onclick="switchMainTab('profiles')">
-        <span>👤 Quản Lý Chrome Profiles</span>
-        <span class="nav-tab-badge" id="navProfilesCount">0</span>
-      </button>
-    </nav>
-
-    <!-- ============================================================ -->
-    <!-- TAB VIEW 1: STUDIO SÁNG TẠO (T2I / I2I)                      -->
-    <!-- ============================================================ -->
-    <div id="viewStudio" class="tab-view active">
-      <!-- Top Bento Grid: Hero Studio (8 cols) + Metrics & Account Pool (4 cols) -->
-      <div class="bento-grid">
-        <!-- HERO: Studio Tạo Ảnh -->
-        <section class="bento-card bento-hero">
-          <div class="card-head">
-            <div class="card-title-group">
-              <span class="card-eyebrow">Studio Sáng Tạo</span>
-              <h2 class="card-title">Tạo ảnh mới (T2I / I2I)</h2>
-              <p class="card-desc">Sinh ảnh sắc nét với Imagen 3 qua câu lệnh ngôn ngữ tự nhiên hoặc ảnh mẫu</p>
-            </div>
-            <span id="studioModeBadge" class="badge badge-neutral">Chế độ T2I</span>
-          </div>
-
-          <form id="jobForm" class="studio-form">
-            <div class="form-group">
-              <label class="form-label" for="prompt">
-                <span>Câu lệnh mô tả (Prompt)</span>
-                <span id="promptCharCount" style="font-size: 11px; font-weight: normal; color: var(--text-subtle);"></span>
-              </label>
-              <textarea id="prompt" class="studio-textarea" rows="3" required placeholder="Nhập câu lệnh tạo ảnh chi tiết (ví dụ: a stickman with many pose, detailed sketches, 8k resolution)..."></textarea>
-              
-              <!-- Quick Chips -->
-              <div class="chips-row">
-                <span class="chips-label">Gợi ý nhanh:</span>
-                <button type="button" class="prompt-chip" data-prompt="a stickman with many pose and detailed item">✦ Stickman poses</button>
-                <button type="button" class="prompt-chip" data-prompt="cyberpunk city at midnight with volumetric neon fog">✦ Cyberpunk city</button>
-                <button type="button" class="prompt-chip" data-prompt="a cute golden retriever puppy sitting on grass, sunlight">✦ Golden retriever</button>
-                <button type="button" class="prompt-chip" data-prompt="3d boy is in island japan, studio ghibli anime style">✦ 3D boy in Japan</button>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                <span>Ảnh tham chiếu (Tùy chọn - Chế độ Image-to-Image)</span>
-              </label>
-              <div class="dropzone-container" id="dropzoneBox">
-                <div class="dropzone-icon">📷</div>
-                <div class="dropzone-text" id="dropzoneText">
-                  <span class="dropzone-title">Chọn hoặc kéo thả ảnh mẫu vào đây</span>
-                  <span class="dropzone-hint">Hỗ trợ PNG, JPG, WebP. Hệ thống tự động upload & liên kết asset cho Google Flow.</span>
-                </div>
-                <div class="dropzone-preview" id="dropzonePreview">
-                  <img id="refImageThumb" class="dropzone-thumb" src="" alt="Thumbnail" />
-                  <button type="button" id="clearRefBtn" class="btn-quiet" style="padding: 3px 8px; font-size: 11px;">✕ Gỡ bỏ</button>
-                </div>
-                <input type="file" id="refImage" class="file-input-hidden" accept="image/*" />
-              </div>
-            </div>
-
-            <button type="submit" id="submitBtn" class="btn-primary">
-              <span>✨ Gửi yêu cầu tạo ảnh vào Hàng đợi</span>
-            </button>
-          </form>
-
-          <!-- Live Tracker -->
-          <div id="liveTracker" class="tracker">
-            <div class="tracker-header">
-              <strong class="tracker-title" id="trackerTitle">⚙️ Tiến trình xử lý Job</strong>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <span id="trackerBadge" class="badge badge-info"><span class="spinner"></span> Đang xử lý</span>
-                <button type="button" id="closeTrackerBtn" class="btn-quiet" style="padding: 2px 7px; font-size: 11px;">✕ Đóng</button>
-              </div>
-            </div>
-            <div class="tracker-desc" id="trackerDesc">Đang chuẩn bị phiên làm việc...</div>
-            <div id="trackerOutputs"></div>
-          </div>
-        </section>
-
-        <!-- SIDEBAR: Metrics & Account Pool -->
-        <aside class="bento-side">
-          <!-- Metric Overview Card -->
-          <div class="bento-card" style="padding: var(--space-lg);">
-            <div class="card-head" style="margin-bottom: var(--space-md);">
+    <!-- Main Workspace -->
+    <main class="app-main">
+      <!-- ============================================================ -->
+      <!-- TAB VIEW 1: STUDIO SÁNG TẠO (T2I / I2I)                      -->
+      <!-- ============================================================ -->
+      <div id="viewStudio" class="tab-view active">
+        <!-- 2-Column Studio Grid: Creation Console (Left) + Live Preview & Showcase (Right) -->
+        <div class="studio-grid">
+          <!-- LEFT: Form Console -->
+          <section class="bento-card studio-console-card">
+            <div class="card-head">
               <div class="card-title-group">
-                <span class="card-eyebrow">Trạng thái</span>
-                <h3 class="card-title" style="font-size: 16px;">Tổng quan Hệ thống</h3>
+                <span class="card-eyebrow">Studio Sáng Tạo</span>
+                <h2 class="card-title">Tạo ảnh mới (T2I / I2I)</h2>
+                <p class="card-desc">Sinh ảnh sắc nét với Imagen 3 qua câu lệnh ngôn ngữ tự nhiên hoặc ảnh mẫu</p>
               </div>
+              <span id="studioModeBadge" class="badge badge-neutral">Chế độ T2I</span>
             </div>
-            <div class="metric-grid">
-              <div class="metric-tile">
-                <span class="metric-val" id="metricQueueCount">0</span>
-                <span class="metric-lbl">Hàng đợi</span>
-              </div>
-              <div class="metric-tile">
-                <span class="metric-val" id="metricAccountsCount">0/0</span>
-                <span class="metric-lbl">Tài khoản</span>
-              </div>
-              <div class="metric-tile">
-                <span class="metric-val" id="metricGalleryCount">0</span>
-                <span class="metric-lbl">Ảnh đã tạo</span>
-              </div>
-            </div>
-          </div>
 
-          <!-- Account Pool Card -->
-          <div class="bento-card" style="flex: 1; padding: var(--space-lg);">
-            <div class="card-head" style="margin-bottom: var(--space-md);">
-              <div class="card-title-group">
-                <span class="card-eyebrow">Điều phối</span>
-                <h3 class="card-title" style="font-size: 16px;">Account Pool</h3>
+            <form id="jobForm" class="studio-form">
+              <div class="form-group">
+                <label class="form-label" for="prompt">
+                  <span>Câu lệnh mô tả (Prompt)</span>
+                  <span id="promptCharCount" style="font-size: 11px; font-weight: normal; color: var(--text-subtle);"></span>
+                </label>
+                <textarea id="prompt" class="studio-textarea" rows="3" required placeholder="Nhập câu lệnh tạo ảnh chi tiết (ví dụ: a stickman with many pose, detailed sketches, 8k resolution)..."></textarea>
+                
+                <!-- Quick Chips -->
+                <div class="chips-row">
+                  <span class="chips-label">Gợi ý nhanh:</span>
+                  <button type="button" class="prompt-chip" data-prompt="a stickman with many pose and detailed item">✦ Stickman poses</button>
+                  <button type="button" class="prompt-chip" data-prompt="cyberpunk city at midnight with volumetric neon fog">✦ Cyberpunk city</button>
+                  <button type="button" class="prompt-chip" data-prompt="a cute golden retriever puppy sitting on grass, sunlight">✦ Golden retriever</button>
+                  <button type="button" class="prompt-chip" data-prompt="3d boy is in island japan, studio ghibli anime style">✦ 3D boy in Japan</button>
+                </div>
               </div>
-              <button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 4px 8px;" onclick="switchMainTab('profiles')">
-                <span>Quản lý Profiles →</span>
+
+              <div class="form-group">
+                <label class="form-label">
+                  <span>Ảnh tham chiếu (Tùy chọn - Chế độ Image-to-Image)</span>
+                </label>
+                <div class="dropzone-container" id="dropzoneBox">
+                  <div class="dropzone-icon">📷</div>
+                  <div class="dropzone-text" id="dropzoneText">
+                    <span class="dropzone-title">Chọn hoặc kéo thả ảnh mẫu vào đây</span>
+                    <span class="dropzone-hint">Hỗ trợ PNG, JPG, WebP. Tự động upload & liên kết asset cho Google Flow.</span>
+                  </div>
+                  <div class="dropzone-preview" id="dropzonePreview">
+                    <img id="refImageThumb" class="dropzone-thumb" src="" alt="Thumbnail" />
+                    <button type="button" id="clearRefBtn" class="btn-quiet" style="padding: 3px 8px; font-size: 11px;">✕ Gỡ bỏ</button>
+                  </div>
+                  <input type="file" id="refImage" class="file-input-hidden" accept="image/*" />
+                </div>
+              </div>
+
+              <button type="submit" id="submitBtn" class="btn-primary" style="width: 100%; margin-top: 4px;">
+                <span>✨ Gửi yêu cầu tạo ảnh vào Hàng đợi</span>
               </button>
+            </form>
+          </section>
+
+          <!-- RIGHT: Live Output & Result Showcase Panel -->
+          <section class="bento-card studio-preview-card">
+            <div class="card-head">
+              <div class="card-title-group">
+                <span class="card-eyebrow">Khung Xem Trước & Kết Quả</span>
+                <h2 class="card-title">Tác phẩm & Tiến trình Live</h2>
+                <p class="card-desc">Hiển thị tiến độ sinh ảnh và xem trước tác phẩm trực quan</p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge badge-info" style="font-size: 11px;">⚡ Imagen 3</span>
+              </div>
             </div>
 
-            <div class="table-responsive" style="border: none;">
-              <table id="accountsTable" class="data-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Tên hiển thị</th>
-                    <th>Phiên</th>
-                    <th>Trạng thái</th>
-                  </tr>
-                </thead>
-                <tbody id="accountsTbody">
-                  <tr><td colspan="4" style="color: var(--text-muted); text-align: center;">Đang tải dữ liệu tài khoản...</td></tr>
-                </tbody>
-              </table>
+            <!-- Live Tracker (active when job in progress or recently completed) -->
+            <div id="liveTracker" class="tracker" style="margin-top: 0;">
+              <div class="tracker-header">
+                <strong class="tracker-title" id="trackerTitle">⚙️ Tiến trình xử lý Job</strong>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span id="trackerBadge" class="badge badge-info"><span class="spinner"></span> Đang xử lý</span>
+                  <button type="button" id="closeTrackerBtn" class="btn-quiet" style="padding: 2px 7px; font-size: 11px;">✕ Đóng</button>
+                </div>
+              </div>
+              <div class="tracker-desc" id="trackerDesc">Đang chuẩn bị phiên làm việc...</div>
+              <div id="trackerOutputs"></div>
             </div>
-          </div>
-        </aside>
-      </div>
+
+            <!-- Idle Showcase Box (shown when liveTracker is not active) -->
+            <div id="studioShowcaseBox" class="studio-showcase-box">
+              <div class="showcase-empty" id="showcaseEmpty">
+                <div class="showcase-empty-icon">🎨</div>
+                <h4 class="showcase-empty-title">Không gian sáng tạo sẵn sàng</h4>
+                <p class="showcase-empty-desc">Nhập câu lệnh prompt bên trái và bấm <strong>Gửi yêu cầu</strong>. Tiến trình sinh ảnh và kết quả độ phân giải cao sẽ xuất hiện trực tiếp tại đây.</p>
+              </div>
+              <div class="showcase-content" id="showcaseContent" style="display: none;">
+                <div class="showcase-head">
+                  <span class="badge badge-success" style="font-size: 10.5px;">✓ Tác phẩm mới nhất</span>
+                  <button type="button" class="btn-quiet" id="showcaseUsePromptBtn" style="font-size: 11px; padding: 2px 8px;">⚡ Dùng prompt này</button>
+                </div>
+                <div class="showcase-img-wrap">
+                  <img id="showcaseImg" src="" alt="Latest generated" class="showcase-img preview-clickable" />
+                </div>
+                <p class="showcase-prompt" id="showcasePrompt"></p>
+              </div>
+            </div>
+          </section>
+        </div>
 
       <!-- FULL SECTION: Lịch sử Jobs gần đây -->
       <section class="bento-card bento-full" style="margin-bottom: var(--space-xl);">
@@ -1160,7 +1337,8 @@ export function getDashboardHtml(): string {
         </div>
       </div>
     </div>
-  </div>
+  </main>
+</div>
 
   <!-- ─── Modal 1: Image Lightbox ─────────────────────────────── -->
   <div id="imageModal" class="modal">
@@ -1888,6 +2066,8 @@ export function getDashboardHtml(): string {
     });
     document.getElementById('closeTrackerBtn').addEventListener('click', () => {
       document.getElementById('liveTracker').classList.remove('active');
+      const showcaseBox = document.getElementById('studioShowcaseBox');
+      if (showcaseBox) showcaseBox.style.display = 'flex';
     });
 
     // Delegation
@@ -2033,6 +2213,37 @@ export function getDashboardHtml(): string {
 
         if (galleryCountEl) galleryCountEl.innerText = totalOutputs + ' ảnh';
         if (metricGalleryCount) metricGalleryCount.innerText = totalOutputs;
+
+        // Update Showcase Box with latest output
+        const showcaseContent = document.getElementById('showcaseContent');
+        const showcaseEmpty = document.getElementById('showcaseEmpty');
+        const showcaseImg = document.getElementById('showcaseImg');
+        const showcasePrompt = document.getElementById('showcasePrompt');
+        const showcaseUsePromptBtn = document.getElementById('showcaseUsePromptBtn');
+
+        let latestOutput = null;
+        let latestJobPrompt = '';
+        for (const job of jobs) {
+          if (job.status === 'succeeded' && job.outputs && job.outputs.length > 0) {
+            latestOutput = job.outputs[0];
+            latestJobPrompt = job.prompt || '';
+            break;
+          }
+        }
+
+        if (latestOutput && showcaseContent && showcaseEmpty && showcaseImg && showcasePrompt) {
+          showcaseEmpty.style.display = 'none';
+          showcaseContent.style.display = 'flex';
+          showcaseImg.src = latestOutput.imageUrl;
+          showcaseImg.setAttribute('data-url', latestOutput.imageUrl);
+          showcaseImg.setAttribute('data-prompt', latestJobPrompt);
+          showcasePrompt.innerText = latestJobPrompt;
+          if (showcaseUsePromptBtn) {
+            showcaseUsePromptBtn.onclick = () => {
+              applyPrompt(latestJobPrompt);
+            };
+          }
+        }
       } catch (e) {
         console.error('Error fetching jobs:', e);
       }
@@ -2100,7 +2311,9 @@ export function getDashboardHtml(): string {
       const trackerDesc = document.getElementById('trackerDesc');
       const trackerOutputs = document.getElementById('trackerOutputs');
       const trackerBadge = document.getElementById('trackerBadge');
+      const showcaseBox = document.getElementById('studioShowcaseBox');
 
+      if (showcaseBox) showcaseBox.style.display = 'none';
       tracker.classList.add('active');
       trackerDesc.innerText = 'Job ' + jobId + ' đã vào hàng đợi, chờ Account điều phối...';
       trackerOutputs.innerHTML = '';
