@@ -38,20 +38,29 @@ npm install
 npm run build
 ```
 
-### 2. Log in with Google Account
+### 2. Manage Chrome Profiles & Sign In
 
-Launch an interactive Chrome session to sign in to Google Flow:
+You can manage all your Chrome profiles directly from the **Web Dashboard** without needing the terminal:
 
+1. Start the server: `npm run start`
+2. Open `http://localhost:3100/` and click the **"Quản Lý Chrome Profiles"** tab.
+3. Click **"+ Thêm Profile Mới"** to create an account profile with an ID and label.
+4. Click **"🔑 Đăng Nhập"** on any profile card — Flow Studio will automatically open a dedicated Google Chrome window for that profile.
+5. Sign in to your Google Account on `flow.google.com` and open/create any project. Flow Studio automatically detects the session and links the remote project in real-time.
+6. Edit labels, toggle enabled status, or delete profiles (including their on-disk browser data) with 1 click.
+
+*(Optional CLI Alternative)*:
 ```bash
 npm run login
-# Or with a custom account ID and label:
-# npm run login account-1 "My Account"
+# Or with custom ID & label:
+# npm run login account-1 "Tài khoản chính"
 ```
 
-Once logged in, open or create a Flow project. Flow Studio will automatically link the project to your local database.
+### 3. Generate an Image (CLI or Dashboard)
 
-### 3. Generate an Image (CLI)
+In the Web Dashboard, use the **"Studio Sáng Tạo"** tab to enter prompts, upload reference images, choose aspect ratios, and generate images live.
 
+Or via CLI:
 ```bash
 # Text-to-Image
 npm run generate "A cute golden retriever puppy sitting on green grass, sunny day"
@@ -110,14 +119,18 @@ await studio.close();
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/api/health` | Health check, uptime, and queue metrics |
-| `GET` | `/api/accounts` | List accounts, status, and current busy leases |
-| `POST` | `/api/accounts` | Register or update an account |
+| `GET` | `/api/accounts` | List accounts, disk profile status, and active leases |
+| `POST` | `/api/accounts` | Create a new account profile (`{ id, label, remoteProjectId }`) |
+| `PUT` | `/api/accounts/:id` | Update profile label, enabled status, or remote project binding |
+| `DELETE` | `/api/accounts/:id` | Delete profile from database (supports `?deleteDisk=true` to wipe disk data) |
+| `POST` | `/api/accounts/:id/login` | Launch Chrome for interactive sign-in and start session detection |
+| `GET` | `/api/accounts/:id/login-status`| Poll live status and progress of the interactive sign-in session |
 | `GET` | `/api/jobs` | List recent jobs with status and attempts |
 | `POST` | `/api/jobs` | Submit a generation job (`{ prompt, inputAssetIds, projectId }`) |
 | `GET` | `/api/jobs/:id` | Get job details, execution attempts, and generated output URLs |
 | `POST` | `/api/assets/upload` | Upload binary image (`image/png`, `image/jpeg`) to BlobStore |
 | `GET` | `/api/assets/:id/blob` | Download content-addressed binary blob |
-| `GET` | `/` | Web Dashboard UI |
+| `GET` | `/` | Responsive Web Dashboard (Studio Sáng Tạo + Chrome Profiles Management) |
 
 ---
 

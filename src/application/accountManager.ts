@@ -1,35 +1,43 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, existsSync, rmSync } from "node:fs";
 import { chromium, type BrowserContext, type Page } from "playwright-core";
 import type { FlowDatabase } from "../infrastructure/db/database.js";
 import type { AccountCoordinator } from "./accountCoordinator.js";
-import { getAccountProfileDir } from "../config.js";
+import { getAccountProfileDir, detectChromePath } from "../config.js";
 import type { Account, SessionStatus } from "../domain/types.js";
-
-const CHROME_EXECUTABLE_PATH =
-  "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 export interface RegisterAccountParams {
   id: string;
   label: string;
+  remoteProjectId?: string;
+}
+
+export interface UpdateAccountParams {
+  label?: string;
+  enabled?: boolean;
+  remoteProjectId?: string;
 }
 
 export interface AccountWithRuntimeInfo extends Account {
   isBusy: boolean;
   activeOperation?: string;
   bindingsCount: number;
+  remoteProjectId?: string;
+  profileExistsOnDisk: boolean;
 }
 
 export class AccountManager {
   constructor(
     private readonly db: FlowDatabase,
     private readonly coordinator: AccountCoordinator,
+    private readonly customChromePath?: string,
   ) {}
 
   /**
    * Registers a new account and initializes its isolated Chrome profile folder.
+   * If remoteProjectId is provided, automatically establishes a binding to proj-default.
    */
   public registerAccount(params: RegisterAccountParams): Account {
-    const { id, label } = params;
+    const { id, label, remoteProjectId } = params;
     const profilePath = getAccountProfileDir(id);
     mkdirSync(profilePath, { recursive: true });
 
@@ -42,9 +50,109 @@ export class AccountManager {
            VALUES (?, ?, ?, 1, 1, 'unauthenticated', ?, ?)`,
         )
         .run(id, label, profilePath, now, now);
+
+      if (remoteProjectId) {
+        const defaultProjId = "proj-default";
+        this.db.db
+          .prepare(
+            `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
+             VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+          )
+          .run(defaultProjId, now, now);
+
+        const bindingId = `bind-${id}-${defaultProjId}`;
+        this.db.db
+          .prepare(
+            `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, 'verified', ?, ?, ?)`,
+          )
+          .run(bindingId, defaultProjId, id, remoteProjectId, now, now, now);
+      }
     });
 
     return this.getAccount(id)!;
+  }
+
+  /**
+   * Updates an existing account's metadata and project binding.
+   */
+  public updateAccount(id: string, params: UpdateAccountParams): Account {
+    const acc = this.getAccount(id);
+    if (!acc) {
+      throw new Error(`Account not found: ${id}`);
+    }
+
+    const now = new Date().toISOString();
+
+    this.db.transaction(() => {
+      if (params.label !== undefined || params.enabled !== undefined) {
+        const newLabel = params.label ?? acc.label;
+        const newEnabled = params.enabled !== undefined ? (params.enabled ? 1 : 0) : (acc.enabled ? 1 : 0);
+        this.db.db
+          .prepare("UPDATE accounts SET label = ?, enabled = ?, updated_at = ? WHERE id = ?")
+          .run(newLabel, newEnabled, now, id);
+      }
+
+      if (params.remoteProjectId !== undefined) {
+        const defaultProjId = "proj-default";
+        this.db.db
+          .prepare(
+            `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
+             VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+          )
+          .run(defaultProjId, now, now);
+
+        const existingBinding = this.db.db
+          .prepare(
+            `SELECT id FROM project_bindings 
+             WHERE project_id = ? AND account_id = ? AND archived_at IS NULL`,
+          )
+          .get(defaultProjId, id) as { id: string } | undefined;
+
+        if (existingBinding) {
+          this.db.db
+            .prepare(
+              `UPDATE project_bindings 
+               SET remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
+               WHERE id = ?`,
+            )
+            .run(params.remoteProjectId, now, now, existingBinding.id);
+        } else {
+          const bindingId = `bind-${id}-${defaultProjId}`;
+          this.db.db
+            .prepare(
+              `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
+               VALUES (?, ?, ?, ?, 'verified', ?, ?, ?)`,
+            )
+            .run(bindingId, defaultProjId, id, params.remoteProjectId, now, now, now);
+        }
+      }
+    });
+
+    return this.getAccount(id)!;
+  }
+
+  /**
+   * Deletes an account, its project bindings, and optionally removes the disk profile folder.
+   */
+  public deleteAccount(id: string, deleteDiskProfile = false): void {
+    if (this.coordinator.isBusy(id)) {
+      throw new Error(`Cannot delete account '${id}' while an operation is currently active.`);
+    }
+
+    const acc = this.getAccount(id);
+    if (!acc) {
+      throw new Error(`Account not found: ${id}`);
+    }
+
+    this.db.transaction(() => {
+      this.db.db.prepare("DELETE FROM project_bindings WHERE account_id = ?").run(id);
+      this.db.db.prepare("DELETE FROM accounts WHERE id = ?").run(id);
+    });
+
+    if (deleteDiskProfile && acc.profilePath && existsSync(acc.profilePath)) {
+      rmSync(acc.profilePath, { recursive: true, force: true });
+    }
   }
 
   /**
@@ -60,12 +168,12 @@ export class AccountManager {
   }
 
   /**
-   * Lists all accounts with real-time coordinator lease status.
+   * Lists all accounts with real-time coordinator lease status and remote project info.
    */
   public listAccounts(): AccountWithRuntimeInfo[] {
     const rows = this.db.db
       .prepare(
-        `SELECT a.*, COUNT(b.id) as bindings_count 
+        `SELECT a.*, COUNT(b.id) as bindings_count, MAX(b.remote_project_id) as remote_project_id
          FROM accounts a
          LEFT JOIN project_bindings b ON a.id = b.account_id AND b.archived_at IS NULL
          GROUP BY a.id
@@ -77,12 +185,15 @@ export class AccountManager {
       const acc = this.mapAccount(row);
       const isBusy = this.coordinator.isBusy(acc.id);
       const activeLease = this.coordinator.getActiveLease(acc.id);
+      const profileExistsOnDisk = Boolean(acc.profilePath && existsSync(acc.profilePath));
 
       return {
         ...acc,
         isBusy,
         activeOperation: activeLease?.operation,
         bindingsCount: row.bindings_count || 0,
+        remoteProjectId: row.remote_project_id || undefined,
+        profileExistsOnDisk,
       };
     });
   }
@@ -110,7 +221,7 @@ export class AccountManager {
     }
 
     const lease = await this.coordinator.acquire(id, "check_session", 30_000);
-    const now = new Date().toISOString();
+    const chromePath = detectChromePath(this.customChromePath);
 
     try {
       this.updateSessionStatus(id, "checking");
@@ -118,7 +229,7 @@ export class AccountManager {
       const context: BrowserContext = await chromium.launchPersistentContext(
         acc.profilePath,
         {
-          executablePath: CHROME_EXECUTABLE_PATH,
+          executablePath: chromePath,
           headless: true,
           viewport: { width: 1280, height: 800 },
           args: ["--disable-blink-features=AutomationControlled"],
@@ -171,10 +282,6 @@ export class AccountManager {
 
   /**
    * Selects the optimal active account and project binding for a given project.
-   * Prioritizes:
-   * 1. Enabled accounts with 'authenticated' session status.
-   * 2. Accounts that are currently idle (NOT busy in coordinator).
-   * 3. Round-robin / least recently updated account.
    */
   public selectEligibleBinding(
     projectId: string,
@@ -208,68 +315,34 @@ export class AccountManager {
       };
     }
 
-    const candidates = this.db.db
+    const bindings = this.db.db
       .prepare(
-        `SELECT b.*, a.profile_path, a.session_epoch, a.session_status, a.updated_at as account_updated_at
+        `SELECT b.*, a.profile_path, a.session_epoch, a.session_status, a.enabled, a.updated_at as account_updated_at
          FROM project_bindings b
          JOIN accounts a ON b.account_id = a.id
-         WHERE b.project_id = ? 
-           AND b.archived_at IS NULL 
-           AND b.setup_state = 'verified'
-           AND b.remote_project_id IS NOT NULL
-           AND a.enabled = 1
-           AND a.session_status = 'authenticated'
-         ORDER BY a.updated_at ASC`,
+         WHERE b.project_id = ? AND b.archived_at IS NULL AND a.enabled = 1 AND b.remote_project_id IS NOT NULL
+         ORDER BY 
+           CASE WHEN a.session_status = 'authenticated' THEN 0 ELSE 1 END ASC,
+           a.updated_at ASC`,
       )
       .all(projectId) as any[];
 
-    if (candidates.length === 0) {
-      // Fallback: check if there are bindings with enabled accounts (even if status is not explicitly authenticated yet)
-      const fallbackCandidates = this.db.db
-        .prepare(
-          `SELECT b.*, a.profile_path, a.session_epoch, a.session_status, a.updated_at as account_updated_at
-           FROM project_bindings b
-           JOIN accounts a ON b.account_id = a.id
-           WHERE b.project_id = ? 
-             AND b.archived_at IS NULL 
-             AND b.setup_state = 'verified'
-             AND b.remote_project_id IS NOT NULL
-             AND a.enabled = 1
-           ORDER BY a.updated_at ASC`,
-        )
-        .all(projectId) as any[];
-
-      if (fallbackCandidates.length === 0) return null;
-
-      // Select first idle fallback account
-      for (const candidate of fallbackCandidates) {
-        if (!this.coordinator.isBusy(candidate.account_id)) {
-          return {
-            bindingId: candidate.id,
-            accountId: candidate.account_id,
-            remoteProjectId: candidate.remote_project_id,
-            profilePath: candidate.profile_path,
-            sessionEpoch: candidate.session_epoch,
-          };
-        }
-      }
+    if (bindings.length === 0) {
       return null;
     }
 
-    // Pick first candidate whose account is not currently busy
-    for (const candidate of candidates) {
-      if (!this.coordinator.isBusy(candidate.account_id)) {
+    for (const b of bindings) {
+      if (!this.coordinator.isBusy(b.account_id)) {
         return {
-          bindingId: candidate.id,
-          accountId: candidate.account_id,
-          remoteProjectId: candidate.remote_project_id,
-          profilePath: candidate.profile_path,
-          sessionEpoch: candidate.session_epoch,
+          bindingId: b.id,
+          accountId: b.account_id,
+          remoteProjectId: b.remote_project_id,
+          profilePath: b.profile_path,
+          sessionEpoch: b.session_epoch,
         };
       }
     }
 
-    // All eligible accounts are busy
     return null;
   }
 
@@ -290,10 +363,10 @@ export class AccountManager {
       label: row.label,
       profilePath: row.profile_path,
       enabled: Boolean(row.enabled),
-      sessionEpoch: Number(row.session_epoch),
+      sessionEpoch: row.session_epoch,
+      sessionStatus: row.session_status,
       observedPrincipal: row.observed_principal,
-      identityEvidence: row.identity_evidence,
-      sessionStatus: row.session_status as SessionStatus,
+      identityEvidence: row.identity_evidence ?? null,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     };

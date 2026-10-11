@@ -471,11 +471,49 @@ export class FlowStudio {
       this.accountManager,
       this.runner,
       this.queue,
-      options,
+      {
+        ...options,
+        manualLoginHelper: options.manualLoginHelper || this.loginHelper,
+      },
     );
 
     await this.server.start();
     return this.server;
+  }
+
+  /**
+   * Registers a new account profile.
+   */
+  public createAccount(params: {
+    id: string;
+    label: string;
+    remoteProjectId?: string;
+  }) {
+    this.ensureNotClosed();
+    return this.accountManager.registerAccount(params);
+  }
+
+  /**
+   * Updates an existing account profile metadata or binding.
+   */
+  public updateAccount(
+    id: string,
+    params: {
+      label?: string;
+      enabled?: boolean;
+      remoteProjectId?: string;
+    },
+  ) {
+    this.ensureNotClosed();
+    return this.accountManager.updateAccount(id, params);
+  }
+
+  /**
+   * Deletes an account profile and optionally deletes its folder on disk.
+   */
+  public deleteAccount(id: string, deleteDiskProfile = false): void {
+    this.ensureNotClosed();
+    this.accountManager.deleteAccount(id, deleteDiskProfile);
   }
 
   /**

@@ -3,6 +3,7 @@ import { FLOW_SQL_SCHEMA } from "./schema.js";
 
 export class FlowDatabase {
   public readonly db: DatabaseSync;
+  private transactionDepth = 0;
 
   constructor(dbPath: string = ":memory:") {
     this.db = new DatabaseSync(dbPath);
@@ -19,16 +20,36 @@ export class FlowDatabase {
 
   /**
    * Executes a callback within an immediate SQLite ACID transaction.
+   * Supports nested transactions seamlessly via SQLite SAVEPOINTs.
    */
   public transaction<T>(callback: () => T): T {
-    this.db.exec("BEGIN IMMEDIATE TRANSACTION;");
+    const isRoot = this.transactionDepth === 0;
+    const savepointName = `sp_${this.transactionDepth}`;
+    this.transactionDepth++;
+
+    if (isRoot) {
+      this.db.exec("BEGIN IMMEDIATE TRANSACTION;");
+    } else {
+      this.db.exec(`SAVEPOINT ${savepointName};`);
+    }
+
     try {
       const result = callback();
-      this.db.exec("COMMIT;");
+      if (isRoot) {
+        this.db.exec("COMMIT;");
+      } else {
+        this.db.exec(`RELEASE SAVEPOINT ${savepointName};`);
+      }
       return result;
     } catch (err) {
-      this.db.exec("ROLLBACK;");
+      if (isRoot) {
+        this.db.exec("ROLLBACK;");
+      } else {
+        this.db.exec(`ROLLBACK TO SAVEPOINT ${savepointName};`);
+      }
       throw err;
+    } finally {
+      this.transactionDepth--;
     }
   }
 

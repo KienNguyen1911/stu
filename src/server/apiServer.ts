@@ -10,11 +10,13 @@ import type { BlobStore } from "../infrastructure/blobs/blobStore.js";
 import type { AccountManager } from "../application/accountManager.js";
 import type { JobQueue } from "../application/jobQueue.js";
 import type { JobRunner } from "../application/jobRunner.js";
+import { ManualLoginHelper } from "../application/manualLogin.js";
 import { getDashboardHtml } from "./dashboardHtml.js";
 
 export interface ApiServerOptions {
   port?: number;
   host?: string;
+  manualLoginHelper?: ManualLoginHelper;
 }
 
 export class ApiServer {
@@ -22,6 +24,17 @@ export class ApiServer {
   private readonly port: number;
   private readonly host: string;
   private readonly startTime = Date.now();
+  private readonly manualLoginHelper: ManualLoginHelper;
+  private readonly activeLoginSessions = new Map<
+    string,
+    {
+      status: "launching" | "running" | "succeeded" | "failed" | "error";
+      message: string;
+      startedAt: number;
+      result?: any;
+      error?: string;
+    }
+  >();
 
   constructor(
     private readonly db: FlowDatabase,
@@ -33,6 +46,8 @@ export class ApiServer {
   ) {
     this.port = options.port || 3100;
     this.host = options.host || "0.0.0.0";
+    this.manualLoginHelper =
+      options.manualLoginHelper || new ManualLoginHelper();
   }
 
   public async start(): Promise<void> {
@@ -112,6 +127,7 @@ export class ApiServer {
         const acc = this.accountManager.registerAccount({
           id: body.id,
           label: body.label,
+          remoteProjectId: body.remoteProjectId,
         });
         return this.sendJson(res, 201, { account: acc });
       }
@@ -152,6 +168,187 @@ export class ApiServer {
           accountId: accId,
           sessionStatus: status,
         });
+      }
+
+      const accountLoginMatch = pathname.match(
+        /^\/api\/accounts\/([^/]+)\/login$/,
+      );
+      if (method === "POST" && accountLoginMatch) {
+        const accId = accountLoginMatch[1]!;
+        const acc = this.accountManager.getAccount(accId);
+        if (!acc) {
+          return this.sendJson(res, 404, { error: `Account not found: ${accId}` });
+        }
+
+        const currentSession = this.activeLoginSessions.get(accId);
+        if (
+          currentSession &&
+          (currentSession.status === "launching" || currentSession.status === "running") &&
+          Date.now() - currentSession.startedAt < 10 * 60 * 1000
+        ) {
+          return this.sendJson(res, 200, {
+            success: true,
+            alreadyRunning: true,
+            session: currentSession,
+          });
+        }
+
+        this.activeLoginSessions.set(accId, {
+          status: "launching",
+          message: "Đang khởi chạy trình duyệt Chrome...",
+          startedAt: Date.now(),
+        });
+
+        // Launch in background
+        (async () => {
+          try {
+            const result = await this.manualLoginHelper.launchLoginSession({
+              profileDir: acc.profilePath,
+              onStatusChange: (statusMsg) => {
+                this.activeLoginSessions.set(accId, {
+                  status: "running",
+                  message: statusMsg,
+                  startedAt: Date.now(),
+                });
+              },
+            });
+
+            if (result.success) {
+              const now = new Date().toISOString();
+              this.db.transaction(() => {
+                this.db.db
+                  .prepare(
+                    `UPDATE accounts 
+                     SET session_status = 'authenticated',
+                         observed_principal = COALESCE(?, observed_principal),
+                         updated_at = ?
+                     WHERE id = ?`,
+                  )
+                  .run(result.email || null, now, accId);
+
+                if (result.remoteProjectId) {
+                  const defaultProjId = "proj-default";
+                  this.db.db
+                    .prepare(
+                      `INSERT OR IGNORE INTO projects (id, name, description, created_at, updated_at)
+                       VALUES (?, 'Dự án tạo ảnh Flow', 'Tự động liên kết', ?, ?)`,
+                    )
+                    .run(defaultProjId, now, now);
+
+                  const existingBinding = this.db.db
+                    .prepare(
+                      `SELECT id FROM project_bindings 
+                       WHERE project_id = ? AND account_id = ? AND archived_at IS NULL`,
+                    )
+                    .get(defaultProjId, accId) as { id: string } | undefined;
+
+                  if (existingBinding) {
+                    this.db.db
+                      .prepare(
+                        `UPDATE project_bindings 
+                         SET remote_project_id = ?, setup_state = 'verified', last_verified_at = ?, updated_at = ?
+                         WHERE id = ?`,
+                      )
+                      .run(result.remoteProjectId, now, now, existingBinding.id);
+                  } else {
+                    const bindingId = `bind-${accId}-${defaultProjId}`;
+                    this.db.db
+                      .prepare(
+                        `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, last_verified_at, created_at, updated_at)
+                         VALUES (?, ?, ?, ?, 'verified', ?, ?, ?)`,
+                      )
+                      .run(
+                        bindingId,
+                        defaultProjId,
+                        accId,
+                        result.remoteProjectId,
+                        now,
+                        now,
+                        now,
+                      );
+                  }
+                }
+              });
+
+              this.activeLoginSessions.set(accId, {
+                status: "succeeded",
+                message: "Đăng nhập và liên kết Flow Project thành công!",
+                startedAt: Date.now(),
+                result,
+              });
+            } else {
+              this.activeLoginSessions.set(accId, {
+                status: "failed",
+                message: "Phiên đăng nhập chưa hoàn tất hoặc đã đóng.",
+                startedAt: Date.now(),
+              });
+            }
+          } catch (err: any) {
+            this.activeLoginSessions.set(accId, {
+              status: "error",
+              message: err.message,
+              startedAt: Date.now(),
+              error: err.message,
+            });
+          }
+        })();
+
+        return this.sendJson(res, 202, {
+          success: true,
+          message: "Đã mở trình duyệt Chrome cho tài khoản. Vui lòng đăng nhập Google.",
+          accountId: accId,
+        });
+      }
+
+      const accountLoginStatusMatch = pathname.match(
+        /^\/api\/accounts\/([^/]+)\/login-status$/,
+      );
+      if (method === "GET" && accountLoginStatusMatch) {
+        const accId = accountLoginStatusMatch[1]!;
+        const session = this.activeLoginSessions.get(accId) || {
+          status: "idle",
+          message: "Chưa có phiên đăng nhập nào đang chạy.",
+        };
+        return this.sendJson(res, 200, { session });
+      }
+
+      // Single Account GET / PUT / DELETE
+      const accountIdMatch = pathname.match(/^\/api\/accounts\/([^/]+)$/);
+      if (accountIdMatch) {
+        const accId = accountIdMatch[1]!;
+
+        if (method === "GET") {
+          const acc = this.accountManager.getAccount(accId);
+          if (!acc) return this.sendJson(res, 404, { error: `Account not found: ${accId}` });
+          return this.sendJson(res, 200, { account: acc });
+        }
+
+        if (method === "PUT" || method === "PATCH") {
+          const body = await this.readJsonBody(req);
+          const updated = this.accountManager.updateAccount(accId, {
+            label: body.label,
+            enabled: body.enabled,
+            remoteProjectId: body.remoteProjectId,
+          });
+          return this.sendJson(res, 200, { success: true, account: updated });
+        }
+
+        if (method === "DELETE") {
+          let deleteDisk = reqUrl.searchParams.get("deleteDisk") === "true";
+          try {
+            const body = await this.readJsonBody(req);
+            if (body?.deleteDisk !== undefined) {
+              deleteDisk = Boolean(body.deleteDisk);
+            }
+          } catch {}
+
+          this.accountManager.deleteAccount(accId, deleteDisk);
+          return this.sendJson(res, 200, {
+            success: true,
+            accountId: accId,
+            deletedDiskProfile: deleteDisk,
+          });
+        }
       }
 
       // 3. Projects & Bindings

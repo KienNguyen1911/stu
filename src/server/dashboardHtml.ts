@@ -1,6 +1,7 @@
 // =======================================================================
 // Flow Studio - Dashboard UI Renderer (Bento & Editorial Serif)
 // Strictly follows DESIGN.md Design System
+// Includes Full Chrome Profiles Management (Create, Edit, Delete, Login)
 // =======================================================================
 
 export function getDashboardHtml(): string {
@@ -9,7 +10,7 @@ export function getDashboardHtml(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flow Studio Core API - Studio & Hàng đợi</title>
+  <title>Flow Studio - AI Generation & Chrome Profiles Management</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -86,7 +87,6 @@ export function getDashboardHtml(): string {
       --tag-border: #27272a;
     }
 
-    /* Selection Treatment from DESIGN.md */
     ::selection {
       background-color: #18181b;
       color: #fafafa;
@@ -100,10 +100,9 @@ export function getDashboardHtml(): string {
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: var(--font-sans);
-      background: var(--bg);
+      background-color: var(--bg);
       color: var(--text);
-      padding: var(--space-xl) var(--space-md);
+      font-family: var(--font-sans);
       min-height: 100vh;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
@@ -111,96 +110,118 @@ export function getDashboardHtml(): string {
     }
 
     .container {
-      max-width: 1280px;
+      max-width: 1320px;
       margin: 0 auto;
+      padding: var(--space-xl) var(--space-lg);
     }
 
-    /* ─── Header ─────────────────────────────────────────────── */
+    /* ─── App Header ─────────────────────────────────────────── */
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: var(--space-lg);
-      margin-bottom: var(--space-xl);
+      margin-bottom: var(--space-md);
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: var(--space-md);
     }
     .brand-wrap {
       display: flex;
-      align-items: baseline;
-      gap: var(--space-md);
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 2px;
     }
     .brand-title {
       font-family: var(--font-serif);
       font-size: 26px;
-      font-weight: 700;
+      font-weight: 600;
       letter-spacing: -0.02em;
       color: var(--text);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: var(--space-sm);
     }
     .brand-subtitle {
       font-size: 13px;
       color: var(--text-muted);
-      font-weight: 500;
     }
     .header-actions {
       display: flex;
       align-items: center;
       gap: var(--space-sm);
     }
-    .btn-quiet {
+
+    /* ─── Nav Tabs ───────────────────────────────────────────── */
+    .nav-tabs-bar {
+      display: flex;
+      gap: 8px;
+      background: var(--surface-muted);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      margin-bottom: var(--space-xl);
+      width: fit-content;
+    }
+    .nav-tab-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
+      gap: 8px;
+      padding: 8px 18px;
       border-radius: var(--radius-sm);
-      font-size: 12px;
-      font-weight: 500;
+      border: none;
+      background: transparent;
       color: var(--text-muted);
-      background: var(--surface-muted);
-      border: 1px solid var(--border);
-      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
       transition: all var(--motion-fast) ease;
     }
-    .btn-quiet:hover {
+    .nav-tab-btn:hover {
       color: var(--text);
-      border-color: var(--border-strong);
-      background: var(--surface-hover);
     }
-
-    /* ─── Badges ─────────────────────────────────────────────── */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 2px 8px;
-      border-radius: 999px;
+    .nav-tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .nav-tab-badge {
       font-size: 11px;
       font-weight: 600;
-      line-height: 1.4;
-      white-space: nowrap;
+      padding: 1px 6px;
+      border-radius: 10px;
+      background: var(--surface-muted);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
+    .nav-tab-btn.active .nav-tab-badge {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-color: var(--primary);
     }
-    .badge-success { background: rgba(22, 163, 74, 0.12); color: var(--success); border: 1px solid rgba(22, 163, 74, 0.25); }
-    .badge-warning { background: rgba(217, 119, 6, 0.12); color: var(--warning); border: 1px solid rgba(217, 119, 6, 0.25); }
-    .badge-danger  { background: rgba(220, 38, 38, 0.12); color: var(--danger);  border: 1px solid rgba(220, 38, 38, 0.25); }
-    .badge-info    { background: rgba(37, 99, 235, 0.12); color: var(--info);    border: 1px solid rgba(37, 99, 235, 0.25); }
-    .badge-neutral { background: var(--surface-muted); color: var(--text-muted); border: 1px solid var(--border); }
 
-    /* ─── Bento Grid Architecture ────────────────────────────── */
+    .tab-view {
+      display: none;
+    }
+    .tab-view.active {
+      display: block;
+      animation: fadeIn var(--motion-normal) ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Bento Cards ────────────────────────────────────────── */
     .bento-grid {
       display: grid;
-      grid-template-columns: repeat(12, 1fr);
+      grid-template-columns: 8fr 4fr;
       gap: var(--space-lg);
       margin-bottom: var(--space-xl);
+    }
+    @media (max-width: 960px) {
+      .bento-grid { grid-template-columns: 1fr; }
     }
     .bento-card {
       background: var(--surface);
@@ -208,31 +229,23 @@ export function getDashboardHtml(): string {
       border-radius: var(--radius-lg);
       padding: var(--space-xl);
       box-shadow: var(--card-shadow);
-      transition: border-color var(--motion-normal) ease, box-shadow var(--motion-normal) ease;
+      display: flex;
+      flex-direction: column;
       position: relative;
     }
-    .bento-card:hover {
-      box-shadow: var(--card-shadow-hover);
-    }
     .bento-hero {
-      grid-column: span 8;
+      position: relative;
+      overflow: hidden;
     }
     .bento-side {
-      grid-column: span 4;
       display: flex;
       flex-direction: column;
       gap: var(--space-lg);
     }
     .bento-full {
-      grid-column: span 12;
+      width: 100%;
     }
 
-    @media (max-width: 980px) {
-      .bento-hero { grid-column: span 12; }
-      .bento-side { grid-column: span 12; }
-    }
-
-    /* Card Header anatomy */
     .card-head {
       display: flex;
       justify-content: space-between;
@@ -247,26 +260,128 @@ export function getDashboardHtml(): string {
     }
     .card-eyebrow {
       font-size: 11px;
-      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: var(--text-subtle);
     }
     .card-title {
       font-family: var(--font-serif);
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 600;
       color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      letter-spacing: -0.01em;
     }
     .card-desc {
       font-size: 12.5px;
       color: var(--text-muted);
+      margin-top: 2px;
     }
 
-    /* ─── Form Controls & Prompt Studio ───────────────────────── */
+    /* ─── Badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .badge-success { background: rgba(22, 163, 74, 0.12); color: var(--success); }
+    .badge-warning { background: rgba(217, 119, 6, 0.12); color: var(--warning); }
+    .badge-danger  { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
+    .badge-info    { background: rgba(37, 99, 235, 0.12); color: var(--info); }
+    .badge-neutral { background: var(--surface-muted); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ─── Buttons ────────────────────────────────────────────── */
+    .btn-primary {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border: 1px solid var(--primary);
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all var(--motion-fast) ease;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--motion-fast) ease;
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .btn-quiet {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      transition: all var(--motion-fast) ease;
+    }
+    .btn-quiet:hover {
+      color: var(--text);
+      border-color: var(--border-strong);
+      background: var(--surface-muted);
+    }
+    .btn-danger-quiet {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all var(--motion-fast) ease;
+    }
+    .btn-danger-quiet:hover {
+      background: rgba(220, 38, 38, 0.1);
+      border-color: var(--danger);
+    }
+
+    /* ─── Studio Form ────────────────────────────────────────── */
     .studio-form {
       display: flex;
       flex-direction: column;
@@ -280,226 +395,284 @@ export function getDashboardHtml(): string {
     .form-label {
       font-size: 12px;
       font-weight: 600;
-      color: var(--text-muted);
+      color: var(--text);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .textarea-wrap {
-      position: relative;
-    }
-    textarea.studio-input {
-      width: 100%;
-      min-height: 84px;
-      padding: var(--space-md);
-      border-radius: var(--radius-md);
-      border: 1px solid var(--border);
+    .studio-input, .studio-textarea {
       background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
       color: var(--text);
       font-family: var(--font-sans);
-      font-size: 14px;
-      line-height: 1.5;
-      resize: vertical;
-      transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+      font-size: 13px;
+      width: 100%;
+      transition: border-color var(--motion-fast) ease;
     }
-    textarea.studio-input:focus {
+    .studio-input:focus, .studio-textarea:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
     }
 
-    /* Inspiration Chips */
+    /* Quick prompt chips */
     .chips-row {
       display: flex;
-      align-items: center;
-      gap: 6px;
       flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
     }
     .chips-label {
       font-size: 11px;
       color: var(--text-subtle);
-      margin-right: 2px;
+      font-weight: 500;
     }
     .prompt-chip {
-      background: var(--tag-bg);
-      border: 1px solid var(--tag-border);
-      border-radius: 999px;
-      padding: 3px 10px;
-      font-size: 11.5px;
-      font-weight: 500;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
       color: var(--text-muted);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       transition: all var(--motion-fast) ease;
     }
     .prompt-chip:hover {
-      background: var(--surface-hover);
       color: var(--text);
       border-color: var(--border-strong);
-      transform: translateY(-1px);
+      background: var(--surface-hover);
     }
 
-    /* Reference Image Dropzone */
+    /* Dropzone */
     .dropzone-container {
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-      padding: var(--space-md);
-      background: var(--surface-muted);
       border: 1px dashed var(--border-strong);
-      border-radius: var(--radius-md);
-      transition: all var(--motion-fast) ease;
+      border-radius: var(--radius-sm);
+      padding: var(--space-md);
+      text-align: center;
       cursor: pointer;
+      background: var(--surface-muted);
+      transition: all var(--motion-fast) ease;
       position: relative;
     }
     .dropzone-container:hover {
-      background: var(--surface-hover);
-      border-color: var(--accent);
+      border-color: var(--primary);
     }
-    .dropzone-icon {
-      font-size: 20px;
-      color: var(--text-muted);
-    }
-    .dropzone-text {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .dropzone-title {
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .dropzone-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
+    .dropzone-icon { font-size: 20px; margin-bottom: 2px; }
+    .dropzone-title { font-size: 12px; font-weight: 600; color: var(--text); display: block; }
+    .dropzone-hint { font-size: 11px; color: var(--text-muted); display: block; }
     .dropzone-preview {
       display: none;
       align-items: center;
-      gap: var(--space-sm);
+      justify-content: center;
+      gap: 12px;
     }
-    .dropzone-preview.active {
-      display: flex;
-    }
+    .dropzone-preview.active { display: flex; }
     .dropzone-thumb {
-      width: 44px;
-      height: 44px;
+      width: 50px;
+      height: 50px;
       object-fit: cover;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
     }
-    .file-input-hidden {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
+    .file-input-hidden { display: none; }
 
-    /* Buttons */
-    .btn-primary {
-      width: 100%;
-      padding: 12px 18px;
-      border-radius: var(--radius-md);
-      border: none;
-      background: var(--primary);
-      color: var(--primary-fg);
-      font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      transition: all var(--motion-fast) ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-hover);
-      transform: translateY(-1px);
-    }
-    .btn-primary:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-    /* ─── Live Tracker Module (Hero integration) ─────────────── */
+    /* Live Tracker */
     .tracker {
       display: none;
-      margin-top: var(--space-md);
-      padding: var(--space-lg);
+      margin-top: var(--space-lg);
+      padding: var(--space-md);
       border-radius: var(--radius-md);
       background: var(--surface-muted);
-      border: 1px solid var(--border-strong);
-      animation: fadeIn var(--motion-normal) ease;
+      border: 1px solid var(--border);
     }
     .tracker.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
     .tracker-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: var(--space-sm);
+      margin-bottom: 6px;
     }
-    .tracker-title {
-      font-size: 13.5px;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .tracker-meta {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: var(--space-sm);
-    }
-    .tracker-desc {
-      font-size: 12.5px;
-      color: var(--text);
-      margin-bottom: var(--space-sm);
-    }
-    .spinner {
-      display: inline-block;
-      width: 13px;
-      height: 13px;
-      border: 2px solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .tracker-title { font-size: 13px; font-weight: 600; }
+    .tracker-desc { font-size: 12px; color: var(--text-muted); }
 
-    /* ─── Bento Supporting Metrics & Accounts ────────────────── */
+    /* Metric Grid */
     .metric-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: var(--space-sm);
-      margin-bottom: var(--space-md);
     }
     .metric-tile {
       background: var(--surface-muted);
       border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      text-align: center;
     }
     .metric-val {
-      font-family: var(--font-serif);
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text);
+      display: block;
       line-height: 1.1;
     }
     .metric-lbl {
       font-size: 11px;
-      font-weight: 500;
       color: var(--text-muted);
+      margin-top: 4px;
+      display: block;
     }
 
-    /* ─── Jobs History Bento Card ─────────────────────────────── */
+    /* ─── Profile Manager Specific Styles ─────────────────────── */
+    .profiles-hero-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-xl);
+      margin-bottom: var(--space-lg);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      box-shadow: var(--card-shadow);
+    }
+    .profiles-kpi-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    @media (max-width: 800px) {
+      .profiles-kpi-bar { grid-template-columns: repeat(2, 1fr); }
+    }
+    .profiles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+
+    .profile-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-lg);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      position: relative;
+    }
+    .profile-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow-hover);
+      border-color: var(--border-strong);
+    }
+    .profile-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+    .profile-identity {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile-chrome-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .profile-label-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .profile-id-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .profile-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--surface-muted);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .profile-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .detail-k { color: var(--text-muted); font-size: 11.5px; }
+    .detail-v {
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .profile-action-btn {
+      flex: 1;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all var(--motion-fast) ease;
+    }
+    .profile-action-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+    }
+    .profile-action-btn.btn-login {
+      background: var(--primary);
+      color: var(--primary-fg);
+      border-color: var(--primary);
+    }
+    .profile-action-btn.btn-login:hover {
+      background: var(--primary-hover);
+    }
+
+    /* ─── Tables ─────────────────────────────────────────────── */
     .table-toolbar {
       display: flex;
       justify-content: space-between;
@@ -531,7 +704,6 @@ export function getDashboardHtml(): string {
       background: var(--surface);
       color: var(--text);
       font-weight: 600;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .search-input {
       padding: 6px 12px;
@@ -541,7 +713,6 @@ export function getDashboardHtml(): string {
       color: var(--text);
       font-size: 12px;
       width: 220px;
-      transition: border-color var(--motion-fast) ease;
     }
     .search-input:focus {
       outline: none;
@@ -574,31 +745,18 @@ export function getDashboardHtml(): string {
       vertical-align: middle;
       background: var(--surface);
     }
-    table.data-table tr:last-child td {
-      border-bottom: none;
-    }
-    table.data-table tr:hover td {
-      background: var(--surface-hover);
-    }
+    table.data-table tr:last-child td { border-bottom: none; }
+    table.data-table tr:hover td { background: var(--surface-hover); }
 
-    #accountsTable th, #accountsTable td {
-      padding: 8px 6px;
-      font-size: 11.5px;
+    .prompt-preview {
+      max-width: 320px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--text);
     }
-    #accountsTable th {
-      font-size: 11px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-      }
-    }
-
-    /* Fixed Clean Horizontal Strip for Output Images in Table */
     .job-thumb-strip {
       display: flex;
       align-items: center;
@@ -622,56 +780,9 @@ export function getDashboardHtml(): string {
       object-fit: cover;
       display: block;
       cursor: pointer;
-      transition: transform var(--motion-fast) ease;
-    }
-    .job-thumb-cell:hover img {
-      transform: scale(1.08);
-    }
-    .job-thumb-dl {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      background: rgba(0, 0, 0, 0.7);
-      color: #fff;
-      padding: 2px 4px;
-      border-radius: 3px;
-      font-size: 9px;
-      text-decoration: none;
-      opacity: 0;
-      transition: opacity var(--motion-fast) ease;
-    }
-    .job-thumb-cell:hover .job-thumb-dl {
-      opacity: 1;
     }
 
-    .prompt-preview {
-      max-width: 320px;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      color: var(--text);
-    }
-    .btn-copy-prompt {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 2px 6px;
-      font-size: 10.5px;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--surface-muted);
-      color: var(--text-muted);
-      cursor: pointer;
-      margin-top: 4px;
-    }
-    .btn-copy-prompt:hover {
-      color: var(--text);
-      border-color: var(--border-strong);
-    }
-
-    /* ─── Gallery Showcase ────────────────────────────────────── */
+    /* Gallery */
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -697,10 +808,6 @@ export function getDashboardHtml(): string {
       object-fit: cover;
       display: block;
       cursor: pointer;
-      transition: transform var(--motion-normal) ease;
-    }
-    .gallery-card:hover img {
-      transform: scale(1.03);
     }
     .gallery-card-overlay {
       position: absolute;
@@ -713,147 +820,94 @@ export function getDashboardHtml(): string {
       padding: var(--space-md);
       transition: opacity var(--motion-fast) ease;
     }
-    .gallery-card:hover .gallery-card-overlay {
-      opacity: 1;
-    }
-    .gallery-top-badge {
-      align-self: flex-end;
-    }
-    .gallery-card-caption {
-      font-size: 11.5px;
-      color: #fafafa;
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .gallery-card-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: flex-end;
-    }
-    .gallery-action-btn {
-      padding: 4px 8px;
-      font-size: 11px;
-      font-weight: 500;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(4px);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: var(--radius-sm);
-      text-decoration: none;
-      cursor: pointer;
-      transition: background var(--motion-fast) ease;
-    }
-    .gallery-action-btn:hover {
-      background: rgba(255, 255, 255, 0.4);
-    }
+    .gallery-card:hover .gallery-card-overlay { opacity: 1; }
 
-    /* ─── Lightbox Modal ──────────────────────────────────────── */
+    /* ─── Modals ─────────────────────────────────────────────── */
     .modal {
       display: none;
       position: fixed;
-      z-index: 9999;
-      top: 0; left: 0; width: 100%; height: 100%;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
       align-items: center;
       justify-content: center;
       padding: var(--space-lg);
     }
-    .modal.active { display: flex; }
+    .modal.active { display: flex; animation: fadeIn var(--motion-fast) ease; }
     .modal-box {
       background: var(--surface);
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-lg);
-      max-width: 960px;
+      max-width: 520px;
       width: 100%;
-      max-height: 92vh;
       overflow: hidden;
+      box-shadow: var(--card-shadow-hover);
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      animation: modalPop var(--motion-normal) ease;
     }
-    @keyframes modalPop {
-      from { transform: scale(0.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+    .modal-box-lg { max-width: 800px; }
     .modal-header {
-      padding: var(--space-md) var(--space-lg);
-      border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: var(--space-lg);
+      border-bottom: 1px solid var(--border);
     }
-    .modal-header strong {
-      font-family: var(--font-serif);
+    .modal-header h3 {
       font-size: 16px;
+      font-weight: 600;
       color: var(--text);
     }
     .modal-close-btn {
       background: transparent;
       border: none;
-      font-size: 18px;
       color: var(--text-muted);
+      font-size: 16px;
       cursor: pointer;
       padding: 4px;
-      line-height: 1;
+      border-radius: 4px;
     }
     .modal-close-btn:hover { color: var(--text); }
     .modal-body {
-      padding: var(--space-md);
+      padding: var(--space-lg);
       display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #000;
-      overflow: auto;
-      max-height: 68vh;
-    }
-    .modal-body img {
-      max-width: 100%;
-      max-height: 65vh;
-      object-fit: contain;
-      border-radius: var(--radius-sm);
+      flex-direction: column;
+      gap: var(--space-md);
+      max-height: 75vh;
+      overflow-y: auto;
     }
     .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
       padding: var(--space-md) var(--space-lg);
       border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: var(--space-md);
-      background: var(--surface);
-      flex-wrap: wrap;
+      background: var(--surface-muted);
     }
-    .modal-prompt-text {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      max-width: 60%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: currentColor;
+      animation: spin 0.8s linear infinite;
     }
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
+    <!-- App Header -->
     <header class="app-header">
       <div class="brand-wrap">
         <h1 class="brand-title">
-          <span>Flow Studio Core API</span>
+          <span>Flow Studio Core</span>
           <span class="badge badge-success"><span class="badge-dot"></span> Online</span>
         </h1>
-        <span class="brand-subtitle">Hệ thống sinh ảnh tự động & điều phối tài khoản Google Flow</span>
+        <span class="brand-subtitle">Hệ thống sinh ảnh tự động & Quản lý Chrome Profiles Google Flow</span>
       </div>
       <div class="header-actions">
         <button id="themeToggleBtn" class="btn-quiet" title="Chuyển chế độ Sáng / Tối" onclick="toggleTheme()">
@@ -865,213 +919,414 @@ export function getDashboardHtml(): string {
       </div>
     </header>
 
-    <!-- Top Bento Grid: Hero Studio (8 cols) + Metrics & Account Pool (4 cols) -->
-    <div class="bento-grid">
-      <!-- HERO: Studio Tạo Ảnh (T2I / I2I) -->
-      <section class="bento-card bento-hero">
+    <!-- Top Navigation Tabs -->
+    <nav class="nav-tabs-bar">
+      <button type="button" class="nav-tab-btn active" id="tabBtnStudio" onclick="switchMainTab('studio')">
+        <span>🎨 Studio Tạo Ảnh</span>
+      </button>
+      <button type="button" class="nav-tab-btn" id="tabBtnProfiles" onclick="switchMainTab('profiles')">
+        <span>👤 Quản Lý Chrome Profiles</span>
+        <span class="nav-tab-badge" id="navProfilesCount">0</span>
+      </button>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- TAB VIEW 1: STUDIO SÁNG TẠO (T2I / I2I)                      -->
+    <!-- ============================================================ -->
+    <div id="viewStudio" class="tab-view active">
+      <!-- Top Bento Grid: Hero Studio (8 cols) + Metrics & Account Pool (4 cols) -->
+      <div class="bento-grid">
+        <!-- HERO: Studio Tạo Ảnh -->
+        <section class="bento-card bento-hero">
+          <div class="card-head">
+            <div class="card-title-group">
+              <span class="card-eyebrow">Studio Sáng Tạo</span>
+              <h2 class="card-title">Tạo ảnh mới (T2I / I2I)</h2>
+              <p class="card-desc">Sinh ảnh sắc nét với Imagen 3 qua câu lệnh ngôn ngữ tự nhiên hoặc ảnh mẫu</p>
+            </div>
+            <span id="studioModeBadge" class="badge badge-neutral">Chế độ T2I</span>
+          </div>
+
+          <form id="jobForm" class="studio-form">
+            <div class="form-group">
+              <label class="form-label" for="prompt">
+                <span>Câu lệnh mô tả (Prompt)</span>
+                <span id="promptCharCount" style="font-size: 11px; font-weight: normal; color: var(--text-subtle);"></span>
+              </label>
+              <textarea id="prompt" class="studio-textarea" rows="3" required placeholder="Nhập câu lệnh tạo ảnh chi tiết (ví dụ: a stickman with many pose, detailed sketches, 8k resolution)..."></textarea>
+              
+              <!-- Quick Chips -->
+              <div class="chips-row">
+                <span class="chips-label">Gợi ý nhanh:</span>
+                <button type="button" class="prompt-chip" data-prompt="a stickman with many pose and detailed item">✦ Stickman poses</button>
+                <button type="button" class="prompt-chip" data-prompt="cyberpunk city at midnight with volumetric neon fog">✦ Cyberpunk city</button>
+                <button type="button" class="prompt-chip" data-prompt="a cute golden retriever puppy sitting on grass, sunlight">✦ Golden retriever</button>
+                <button type="button" class="prompt-chip" data-prompt="3d boy is in island japan, studio ghibli anime style">✦ 3D boy in Japan</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Ảnh tham chiếu (Tùy chọn - Chế độ Image-to-Image)</span>
+              </label>
+              <div class="dropzone-container" id="dropzoneBox">
+                <div class="dropzone-icon">📷</div>
+                <div class="dropzone-text" id="dropzoneText">
+                  <span class="dropzone-title">Chọn hoặc kéo thả ảnh mẫu vào đây</span>
+                  <span class="dropzone-hint">Hỗ trợ PNG, JPG, WebP. Hệ thống tự động upload & liên kết asset cho Google Flow.</span>
+                </div>
+                <div class="dropzone-preview" id="dropzonePreview">
+                  <img id="refImageThumb" class="dropzone-thumb" src="" alt="Thumbnail" />
+                  <button type="button" id="clearRefBtn" class="btn-quiet" style="padding: 3px 8px; font-size: 11px;">✕ Gỡ bỏ</button>
+                </div>
+                <input type="file" id="refImage" class="file-input-hidden" accept="image/*" />
+              </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary">
+              <span>✨ Gửi yêu cầu tạo ảnh vào Hàng đợi</span>
+            </button>
+          </form>
+
+          <!-- Live Tracker -->
+          <div id="liveTracker" class="tracker">
+            <div class="tracker-header">
+              <strong class="tracker-title" id="trackerTitle">⚙️ Tiến trình xử lý Job</strong>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="trackerBadge" class="badge badge-info"><span class="spinner"></span> Đang xử lý</span>
+                <button type="button" id="closeTrackerBtn" class="btn-quiet" style="padding: 2px 7px; font-size: 11px;">✕ Đóng</button>
+              </div>
+            </div>
+            <div class="tracker-desc" id="trackerDesc">Đang chuẩn bị phiên làm việc...</div>
+            <div id="trackerOutputs"></div>
+          </div>
+        </section>
+
+        <!-- SIDEBAR: Metrics & Account Pool -->
+        <aside class="bento-side">
+          <!-- Metric Overview Card -->
+          <div class="bento-card" style="padding: var(--space-lg);">
+            <div class="card-head" style="margin-bottom: var(--space-md);">
+              <div class="card-title-group">
+                <span class="card-eyebrow">Trạng thái</span>
+                <h3 class="card-title" style="font-size: 16px;">Tổng quan Hệ thống</h3>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-tile">
+                <span class="metric-val" id="metricQueueCount">0</span>
+                <span class="metric-lbl">Hàng đợi</span>
+              </div>
+              <div class="metric-tile">
+                <span class="metric-val" id="metricAccountsCount">0/0</span>
+                <span class="metric-lbl">Tài khoản</span>
+              </div>
+              <div class="metric-tile">
+                <span class="metric-val" id="metricGalleryCount">0</span>
+                <span class="metric-lbl">Ảnh đã tạo</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Pool Card -->
+          <div class="bento-card" style="flex: 1; padding: var(--space-lg);">
+            <div class="card-head" style="margin-bottom: var(--space-md);">
+              <div class="card-title-group">
+                <span class="card-eyebrow">Điều phối</span>
+                <h3 class="card-title" style="font-size: 16px;">Account Pool</h3>
+              </div>
+              <button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 4px 8px;" onclick="switchMainTab('profiles')">
+                <span>Quản lý Profiles →</span>
+              </button>
+            </div>
+
+            <div class="table-responsive" style="border: none;">
+              <table id="accountsTable" class="data-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tên hiển thị</th>
+                    <th>Phiên</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody id="accountsTbody">
+                  <tr><td colspan="4" style="color: var(--text-muted); text-align: center;">Đang tải dữ liệu tài khoản...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- FULL SECTION: Lịch sử Jobs gần đây -->
+      <section class="bento-card bento-full" style="margin-bottom: var(--space-xl);">
         <div class="card-head">
           <div class="card-title-group">
-            <span class="card-eyebrow">Studio Sáng Tạo</span>
-            <h2 class="card-title">Tạo ảnh mới (T2I / I2I)</h2>
-            <p class="card-desc">Sinh ảnh sắc nét với Imagen 3 qua câu lệnh ngôn ngữ tự nhiên hoặc ảnh mẫu</p>
+            <span class="card-eyebrow">Nhật ký & Tiến trình</span>
+            <h2 class="card-title">Lịch sử Jobs gần đây</h2>
+            <p class="card-desc">Kiểm tra kết quả sinh ảnh, tải ảnh chất lượng gốc (PNG) và sao chép prompt</p>
           </div>
-          <span id="studioModeBadge" class="badge badge-neutral">Chế độ T2I</span>
         </div>
 
-        <form id="jobForm" class="studio-form">
-          <div class="form-group">
-            <label class="form-label" for="prompt">
-              <span>Câu lệnh mô tả (Prompt)</span>
-              <span id="promptCharCount" style="font-size: 11px; font-weight: normal; color: var(--text-subtle);"></span>
-            </label>
-            <div class="textarea-wrap">
-              <textarea id="prompt" class="studio-input" rows="3" required placeholder="Nhập câu lệnh tạo ảnh chi tiết (ví dụ: a stickman with many pose, detailed sketches, 8k resolution)..."></textarea>
-            </div>
-            <!-- Quick Chips -->
-            <div class="chips-row">
-              <span class="chips-label">Gợi ý nhanh:</span>
-              <button type="button" class="prompt-chip" data-prompt="a stickman with many pose and detailed item">✦ Stickman poses</button>
-              <button type="button" class="prompt-chip" data-prompt="cyberpunk city at midnight with volumetric neon fog">✦ Cyberpunk city</button>
-              <button type="button" class="prompt-chip" data-prompt="a cute golden retriever puppy sitting on grass, sunlight">✦ Golden retriever</button>
-              <button type="button" class="prompt-chip" data-prompt="3d boy is in island japan, studio ghibli anime style">✦ 3D boy in Japan</button>
-            </div>
+        <div class="table-toolbar">
+          <div class="filter-tabs">
+            <button type="button" class="filter-btn active" data-filter="all">Tất cả</button>
+            <button type="button" class="filter-btn" data-filter="succeeded">✅ Đã xong</button>
+            <button type="button" class="filter-btn" data-filter="running">⚙️ Đang chạy</button>
+            <button type="button" class="filter-btn" data-filter="failed">❌ Lỗi</button>
           </div>
+          <input type="text" id="jobSearchInput" class="search-input" placeholder="🔍 Tìm kiếm Prompt hoặc Job ID..." />
+        </div>
 
-          <div class="form-group">
-            <label class="form-label">
-              <span>Ảnh tham chiếu (Tùy chọn - Chế độ Image-to-Image)</span>
-            </label>
-            <div class="dropzone-container" id="dropzoneBox">
-              <div class="dropzone-icon">📷</div>
-              <div class="dropzone-text" id="dropzoneText">
-                <span class="dropzone-title">Chọn hoặc kéo thả ảnh mẫu vào đây</span>
-                <span class="dropzone-hint">Hỗ trợ PNG, JPG, WebP. Hệ thống tự động upload & liên kết asset cho Google Flow.</span>
-              </div>
-              <div class="dropzone-preview" id="dropzonePreview">
-                <img id="refImageThumb" class="dropzone-thumb" src="" alt="Thumbnail" />
-                <button type="button" id="clearRefBtn" class="btn-quiet" style="padding: 3px 8px; font-size: 11px;">✕ Gỡ bỏ</button>
-              </div>
-              <input type="file" id="refImage" class="file-input-hidden" accept="image/*" aria-label="Chọn tệp ảnh tham chiếu (Image-to-Image)" />
-            </div>
-          </div>
-
-          <button type="submit" id="submitBtn" class="btn-primary">
-            <span>✨ Gửi yêu cầu tạo ảnh vào Hàng đợi</span>
-          </button>
-        </form>
-
-        <!-- Live Tracker -->
-        <div id="liveTracker" class="tracker">
-          <div class="tracker-header">
-            <strong class="tracker-title" id="trackerTitle">⚙️ Tiến trình xử lý Job</strong>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="trackerBadge" class="badge badge-info"><span class="spinner"></span> Đang xử lý</span>
-              <button type="button" id="closeTrackerBtn" class="btn-quiet" style="padding: 2px 7px; font-size: 11px;">✕ Đóng</button>
-            </div>
-          </div>
-          <div class="tracker-meta" id="trackerJobId"></div>
-          <div class="tracker-desc" id="trackerDesc">Đang chuẩn bị phiên làm việc...</div>
-          <div id="trackerOutputs"></div>
+        <div class="table-responsive">
+          <table id="jobsTable" class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Mã Job</th>
+                <th style="min-width: 260px;">Câu lệnh (Prompt)</th>
+                <th style="width: 120px;">Trạng thái</th>
+                <th style="min-width: 250px;">Ảnh kết quả & Tải về</th>
+                <th style="width: 110px;">Thời gian</th>
+              </tr>
+            </thead>
+            <tbody id="jobsTbody">
+              <tr><td colspan="5" style="color: var(--text-muted); text-align: center;">Đang tải danh sách jobs...</td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
-      <!-- SIDEBAR: Metrics Overview & Account Pool (4 cols) -->
-      <aside class="bento-side">
-        <!-- Metric Overview Card -->
-        <div class="bento-card" style="padding: var(--space-lg);">
-          <div class="card-head" style="margin-bottom: var(--space-md);">
-            <div class="card-title-group">
-              <span class="card-eyebrow">Trạng thái</span>
-              <h3 class="card-title" style="font-size: 16px;">Tổng quan Hệ thống</h3>
-            </div>
+      <!-- FULL SECTION: Thư viện Ảnh đã tạo -->
+      <section class="bento-card bento-full">
+        <div class="card-head">
+          <div class="card-title-group">
+            <span class="card-eyebrow">Thư viện Kết quả</span>
+            <h2 class="card-title">Thư viện Ảnh đã tạo</h2>
+            <p class="card-desc">Tập hợp toàn bộ các sản phẩm đồ họa được trích xuất trực tiếp từ Google Flow</p>
           </div>
-          <div class="metric-grid">
-            <div class="metric-tile">
-              <span class="metric-val" id="metricQueueCount">0</span>
-              <span class="metric-lbl">Hàng đợi</span>
-            </div>
-            <div class="metric-tile">
-              <span class="metric-val" id="metricAccountsCount">1/1</span>
-              <span class="metric-lbl">Tài khoản</span>
-            </div>
-            <div class="metric-tile">
-              <span class="metric-val" id="metricGalleryCount">0</span>
-              <span class="metric-lbl">Ảnh đã tạo</span>
-            </div>
-          </div>
+          <span class="badge badge-neutral" id="galleryCount">0 ảnh</span>
         </div>
 
-        <!-- Account Pool Card -->
-        <div class="bento-card" style="flex: 1; padding: var(--space-lg);">
-          <div class="card-head" style="margin-bottom: var(--space-md);">
-            <div class="card-title-group">
-              <span class="card-eyebrow">Điều phối</span>
-              <h3 class="card-title" style="font-size: 16px;">
-                <span>Quản lý Đa tài khoản (Account Pool)</span>
-              </h3>
-            </div>
-            <span class="badge badge-neutral" id="poolSummary">1 tài khoản</span>
-          </div>
-
-          <!-- Account list (Rendered cleanly with full semantic table preserved for compatibility) -->
-          <div class="table-responsive" style="border: none;">
-            <table id="accountsTable" class="data-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Tên hiển thị</th>
-                  <th>Phiên</th>
-                  <th>Trạng thái</th>
-                </tr>
-              </thead>
-              <tbody id="accountsTbody">
-                <tr><td colspan="4" style="color: var(--text-muted); text-align: center;">Đang tải dữ liệu tài khoản...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </aside>
+        <div class="gallery-grid" id="gallery"></div>
+      </section>
     </div>
 
-    <!-- FULL SECTION: Lịch sử Jobs gần đây -->
-    <section class="bento-card bento-full" style="margin-bottom: var(--space-xl);">
-      <div class="card-head">
-        <div class="card-title-group">
-          <span class="card-eyebrow">Nhật ký & Tiến trình</span>
-          <h2 class="card-title">Lịch sử Jobs gần đây (Xem trước & Tải về máy)</h2>
-          <p class="card-desc">Kiểm tra kết quả sinh ảnh, tải ảnh chất lượng gốc (PNG) và sao chép prompt</p>
+    <!-- ============================================================ -->
+    <!-- TAB VIEW 2: QUẢN LÝ CHROME PROFILES (ACCOUNT POOL)           -->
+    <!-- ============================================================ -->
+    <div id="viewProfiles" class="tab-view">
+      <!-- Header Banner Card -->
+      <div class="profiles-hero-card">
+        <div>
+          <span class="card-eyebrow">Hồ sơ trình duyệt</span>
+          <h2 class="card-title" style="font-size: 24px;">Quản Lý Chrome Profiles</h2>
+          <p class="card-desc">Tạo, chỉnh sửa, xóa và mở trình duyệt Chrome để đăng nhập Google Flow trực tiếp trên giao diện web.</p>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button type="button" class="btn-quiet" onclick="fetchAccounts()">
+            <span>🔄 Làm mới</span>
+          </button>
+          <button type="button" class="btn-primary" onclick="openCreateProfileModal()">
+            <span>➕ Thêm Profile Mới</span>
+          </button>
         </div>
       </div>
 
-      <div class="table-toolbar">
-        <div class="filter-tabs">
-          <button type="button" class="filter-btn active" data-filter="all">Tất cả</button>
-          <button type="button" class="filter-btn" data-filter="succeeded">✅ Đã xong</button>
-          <button type="button" class="filter-btn" data-filter="running">⚙️ Đang chạy</button>
-          <button type="button" class="filter-btn" data-filter="failed">❌ Lỗi</button>
+      <!-- KPI Summary Bar -->
+      <div class="profiles-kpi-bar">
+        <div class="metric-tile">
+          <span class="metric-val" id="kpiTotalProfiles">0</span>
+          <span class="metric-lbl">Tổng số Profiles</span>
         </div>
-        <input type="text" id="jobSearchInput" class="search-input" placeholder="🔍 Tìm kiếm Prompt hoặc Job ID..." />
-      </div>
-
-      <div class="table-responsive">
-        <table id="jobsTable" class="data-table">
-          <thead>
-            <tr>
-              <th style="width: 140px;">Mã Job</th>
-              <th style="min-width: 260px;">Câu lệnh (Prompt)</th>
-              <th style="width: 120px;">Trạng thái</th>
-              <th style="min-width: 250px;">Ảnh kết quả & Tải về</th>
-              <th style="width: 110px;">Thời gian</th>
-            </tr>
-          </thead>
-          <tbody id="jobsTbody">
-            <tr><td colspan="5" style="color: var(--text-muted); text-align: center;">Đang tải danh sách jobs...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- FULL SECTION: Thư viện Ảnh đã tạo -->
-    <section class="bento-card bento-full">
-      <div class="card-head">
-        <div class="card-title-group">
-          <span class="card-eyebrow">Thư viện Kết quả</span>
-          <h2 class="card-title">Thư viện Ảnh đã tạo</h2>
-          <p class="card-desc">Tập hợp toàn bộ các sản phẩm đồ họa được trích xuất trực tiếp từ Google Flow Studio</p>
+        <div class="metric-tile">
+          <span class="metric-val" style="color: var(--success);" id="kpiAuthProfiles">0</span>
+          <span class="metric-lbl">Đã xác thực Google</span>
         </div>
-        <span class="badge badge-neutral" id="galleryCount">0 ảnh</span>
+        <div class="metric-tile">
+          <span class="metric-val" style="color: var(--warning);" id="kpiUnauthProfiles">0</span>
+          <span class="metric-lbl">Chưa đăng nhập / Cần kiểm tra</span>
+        </div>
+        <div class="metric-tile">
+          <span class="metric-val" style="color: var(--info);" id="kpiBusyProfiles">0</span>
+          <span class="metric-lbl">Đang chạy job tạo ảnh</span>
+        </div>
       </div>
 
-      <div class="gallery-grid" id="gallery"></div>
-    </section>
+      <!-- Profiles Grid Cards -->
+      <div class="profiles-grid" id="profilesCardsContainer">
+        <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">
+          Đang tải danh sách Chrome profiles...
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Lightbox Modal -->
+  <!-- ─── Modal 1: Image Lightbox ─────────────────────────────── -->
   <div id="imageModal" class="modal">
-    <div class="modal-box">
+    <div class="modal-box modal-box-lg">
       <div class="modal-header">
         <strong id="modalTitle">Xem ảnh chi tiết</strong>
         <button type="button" class="modal-close-btn" id="modalCloseBtn">✕</button>
       </div>
-      <div class="modal-body">
-        <img id="modalImg" src="" alt="Preview" />
+      <div class="modal-body" style="padding: 0; background: #000; align-items: center; justify-content: center;">
+        <img id="modalImg" src="" style="max-height: 70vh; max-width: 100%; object-fit: contain;" alt="Preview" />
       </div>
       <div class="modal-footer">
-        <div id="modalPrompt" class="modal-prompt-text"></div>
-        <div class="modal-actions">
+        <div id="modalPrompt" class="prompt-preview" style="flex: 1; font-size: 12px;"></div>
+        <div style="display: flex; gap: 8px;">
           <button type="button" class="btn-quiet" id="modalReuseBtn">⚡ Dùng prompt này</button>
-          <a id="modalDownloadBtn" href="" download="flow-image.png" class="btn-quiet" style="background: var(--primary); color: var(--primary-fg); border-color: var(--primary);">⬇ Tải ảnh gốc (PNG)</a>
+          <a id="modalDownloadBtn" href="" download="flow-image.png" class="btn-primary" style="text-decoration: none;">⬇ Tải file gốc (PNG)</a>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ─── Modal 2: Create Chrome Profile ───────────────────────── -->
+  <div id="createProfileModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>➕ Thêm Chrome Profile Mới</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('createProfileModal')">✕</button>
+      </div>
+      <form id="createProfileForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="newAccountId">
+              <span>Mã Profile ID (Account ID)</span>
+              <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">Dùng đặt tên thư mục profile</span>
+            </label>
+            <input type="text" id="newAccountId" class="studio-input" required placeholder="ví dụ: account-2, acc-marketing" pattern="[a-zA-Z0-9_-]+" title="Chỉ chứa chữ cái, số, gạch nối và gạch dưới" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newAccountLabel">
+              <span>Tên hiển thị (Label)</span>
+            </label>
+            <input type="text" id="newAccountLabel" class="studio-input" required placeholder="ví dụ: Tài khoản Marketing, Acc Phụ 1" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="newRemoteProjectId">
+              <span>Flow Remote Project ID (Tùy chọn)</span>
+              <span style="font-size: 11px; font-weight: normal; color: var(--text-muted);">Tự động phát hiện khi đăng nhập</span>
+            </label>
+            <input type="text" id="newRemoteProjectId" class="studio-input" placeholder="ví dụ: 79272edb-389a-4aa8-b735-7c47017a2cd3 hoặc link URL" />
+          </div>
+
+          <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="autoLaunchLogin" style="cursor: pointer;" checked />
+            <label for="autoLaunchLogin" style="font-size: 12.5px; cursor: pointer; color: var(--text);">
+              Mở trình duyệt Chrome để đăng nhập Google ngay sau khi tạo
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-quiet" onclick="closeModal('createProfileModal')">Hủy</button>
+          <button type="submit" id="btnCreateProfileSubmit" class="btn-primary">Tạo Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── Modal 3: Edit Chrome Profile ─────────────────────────── -->
+  <div id="editProfileModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>✏️ Chỉnh Sửa Chrome Profile</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('editProfileModal')">✕</button>
+      </div>
+      <form id="editProfileForm">
+        <input type="hidden" id="editAccountId" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Profile ID</label>
+            <input type="text" id="editAccountIdDisplay" class="studio-input" disabled style="opacity: 0.7; font-family: var(--font-mono);" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editAccountLabel">Tên hiển thị (Label)</label>
+            <input type="text" id="editAccountLabel" class="studio-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editRemoteProjectId">Flow Remote Project ID</label>
+            <input type="text" id="editRemoteProjectId" class="studio-input" placeholder="Nhập remote project UUID hoặc dán link Flow" />
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            <input type="checkbox" id="editAccountEnabled" style="cursor: pointer;" />
+            <label for="editAccountEnabled" style="font-size: 12.5px; cursor: pointer; color: var(--text);">
+              Kích hoạt tài khoản này trong hàng đợi tạo ảnh (Enabled)
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-quiet" onclick="closeModal('editProfileModal')">Hủy</button>
+          <button type="submit" class="btn-primary">Lưu Thay Đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── Modal 4: Delete Chrome Profile ───────────────────────── -->
+  <div id="deleteProfileModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="color: var(--danger);">🗑️ Xác Nhận Xóa Chrome Profile</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('deleteProfileModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13.5px; color: var(--text);">
+          Bạn có chắc chắn muốn xóa profile <strong id="deleteAccountName" style="color: var(--danger);"></strong> (ID: <span id="deleteAccountId" style="font-family: var(--font-mono);"></span>) không?
+        </p>
+        <p style="font-size: 12px; color: var(--text-muted);">
+          Thao tác này sẽ gỡ bỏ tài khoản và các liên kết dự án khỏi cơ sở dữ liệu.
+        </p>
+
+        <div style="background: var(--surface-muted); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); margin-top: 6px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12.5px;">
+            <input type="checkbox" id="deleteDiskCheckbox" style="cursor: pointer;" />
+            <span>Đồng thời xóa toàn bộ dữ liệu & cookies trên ổ đĩa (<code id="deleteDiskPath"></code>)</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-quiet" onclick="closeModal('deleteProfileModal')">Hủy</button>
+        <button type="button" id="btnConfirmDelete" class="btn-danger-quiet" style="background: var(--danger); color: #fff; border: none; font-weight: 600;">Xác Nhận Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Modal 5: Live Login Tracker Modal ────────────────────── -->
+  <div id="loginTrackerModal" class="modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="loginModalTitle">🔑 Đăng Nhập Google Flow</h3>
+        <button type="button" class="modal-close-btn" onclick="closeModal('loginTrackerModal')">✕</button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: var(--space-xl) var(--space-lg);">
+        <div id="loginModalSpinner" style="font-size: 36px; margin-bottom: 12px;">🌐</div>
+        <h4 id="loginModalStatus" style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Đang khởi chạy Google Chrome...</h4>
+        <p id="loginModalHint" style="font-size: 12.5px; color: var(--text-muted); line-height: 1.5; max-width: 400px; margin: 0 auto;">
+          Cửa sổ Chrome thật vừa được mở trên màn hình của bạn. Hãy đăng nhập tài khoản Google và mở 1 Project trên Google Flow để hệ thống tự động xác minh.
+        </p>
+      </div>
+      <div class="modal-footer" style="justify-content: center;">
+        <button type="button" class="btn-quiet" onclick="closeModal('loginTrackerModal')">Thu nhỏ & Tiếp tục</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Core Script ──────────────────────────────────────────── -->
   <script>
     const renderedAssetKeys = new Set();
     let currentPollingJobId = null;
     let allFetchedJobs = [];
     let currentFilterStatus = 'all';
     let searchQuery = '';
+    let accountsDataCache = [];
+    let activeLoginPollingInterval = null;
 
     // Theme Management
     function initTheme() {
@@ -1101,57 +1356,505 @@ export function getDashboardHtml(): string {
     }
     initTheme();
 
-    // Quick Prompt Helper
-    function applyPrompt(text) {
-      const promptInput = document.getElementById('prompt');
-      promptInput.value = text;
-      promptInput.focus();
-      updateCharCount();
-    }
+    // Main Tab Switching
+    function switchMainTab(tabId) {
+      const btnStudio = document.getElementById('tabBtnStudio');
+      const btnProfiles = document.getElementById('tabBtnProfiles');
+      const viewStudio = document.getElementById('viewStudio');
+      const viewProfiles = document.getElementById('viewProfiles');
 
-    function updateCharCount() {
-      const promptInput = document.getElementById('prompt');
-      const counter = document.getElementById('promptCharCount');
-      if (counter) counter.innerText = promptInput.value.length > 0 ? (promptInput.value.length + ' ký tự') : '';
-    }
-    document.getElementById('prompt').addEventListener('input', updateCharCount);
-
-    // File Input Helper
-    const fileInputEl = document.getElementById('refImage');
-    fileInputEl.addEventListener('change', () => {
-      const preview = document.getElementById('dropzonePreview');
-      const thumb = document.getElementById('refImageThumb');
-      const dropText = document.getElementById('dropzoneText');
-      const modeBadge = document.getElementById('studioModeBadge');
-
-      if (fileInputEl.files && fileInputEl.files[0]) {
-        const file = fileInputEl.files[0];
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          thumb.src = evt.target.result;
-          preview.classList.add('active');
-          dropText.style.display = 'none';
-          if (modeBadge) {
-            modeBadge.className = 'badge badge-info';
-            modeBadge.innerText = 'Chế độ I2I (Image-to-Image)';
-          }
-        };
-        reader.readAsDataURL(file);
+      if (tabId === 'profiles') {
+        btnStudio.classList.remove('active');
+        btnProfiles.classList.add('active');
+        viewStudio.classList.remove('active');
+        viewProfiles.classList.add('active');
+        localStorage.setItem('flow_studio_tab', 'profiles');
+        renderProfilesManager();
       } else {
-        clearRefImage();
+        btnProfiles.classList.remove('active');
+        btnStudio.classList.add('active');
+        viewProfiles.classList.remove('active');
+        viewStudio.classList.add('active');
+        localStorage.setItem('flow_studio_tab', 'studio');
+      }
+    }
+
+    const savedTab = localStorage.getItem('flow_studio_tab');
+    if (savedTab === 'profiles') {
+      switchMainTab('profiles');
+    }
+
+    // Modal Helpers
+    function openModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.remove('active');
+      if (modalId === 'loginTrackerModal' && activeLoginPollingInterval) {
+        clearInterval(activeLoginPollingInterval);
+        activeLoginPollingInterval = null;
+      }
+    }
+
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+          closeModal(e.target.id);
+        }
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(m => closeModal(m.id));
       }
     });
 
-    function clearRefImage() {
-      const preview = document.getElementById('dropzonePreview');
-      const thumb = document.getElementById('refImageThumb');
-      const dropText = document.getElementById('dropzoneText');
-      const modeBadge = document.getElementById('studioModeBadge');
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
 
+    // ─── ACCOUNTS FETCHING & RENDERING ───────────────────────────
+    async function fetchAccounts() {
+      try {
+        const res = await fetch('/api/accounts');
+        const data = await res.json();
+        const accounts = data.accounts || [];
+        accountsDataCache = accounts;
+
+        // Update nav badge & pool summary
+        const navCount = document.getElementById('navProfilesCount');
+        if (navCount) navCount.innerText = accounts.length;
+
+        const poolSummary = document.getElementById('poolSummary');
+        if (poolSummary) poolSummary.innerText = accounts.length + ' tài khoản';
+
+        // Update mini-table on Studio Sidebar
+        const tbody = document.getElementById('accountsTbody');
+        const metricAccounts = document.getElementById('metricAccountsCount');
+
+        let availableCount = 0;
+        let miniHtml = '';
+        for (const a of accounts) {
+          const isAuthed = a.sessionStatus === 'authenticated';
+          const sessionBadge = isAuthed ? 'badge-success' : 'badge-warning';
+          const isBusy = a.isBusy;
+          if (!isBusy && isAuthed) availableCount++;
+
+          const busyBadge = isBusy ? 'badge-warning' : 'badge-success';
+          const busyText = isBusy ? ('Bận (' + (a.activeOperation || 'Đang tạo') + ')') : 'Sẵn sàng';
+
+          miniHtml += '<tr>' +
+            '<td style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;">' + escapeHtml(a.id) + '</td>' +
+            '<td><span style="font-weight: 500;">' + escapeHtml(a.label) + '</span></td>' +
+            '<td><span class="badge ' + sessionBadge + '"><span class="badge-dot"></span> ' + escapeHtml(a.sessionStatus) + '</span></td>' +
+            '<td><span class="badge ' + busyBadge + '"><span class="badge-dot"></span> ' + busyText + '</span></td>' +
+          '</tr>';
+        }
+
+        if (metricAccounts) {
+          metricAccounts.innerText = availableCount + '/' + accounts.length;
+        }
+
+        if (tbody) {
+          tbody.innerHTML = miniHtml || '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chưa có tài khoản nào được kết nối.</td></tr>';
+        }
+
+        // Update Profiles Manager view if visible
+        renderProfilesManager();
+      } catch (e) {
+        console.error('Error fetching accounts:', e);
+      }
+    }
+
+    // Render Profiles Manager View
+    function renderProfilesManager() {
+      const container = document.getElementById('profilesCardsContainer');
+      if (!container) return;
+
+      const accounts = accountsDataCache;
+
+      // Update KPI
+      let authed = 0, unauthed = 0, busy = 0;
+      accounts.forEach(a => {
+        if (a.sessionStatus === 'authenticated') authed++;
+        else unauthed++;
+        if (a.isBusy) busy++;
+      });
+
+      const kpiTotal = document.getElementById('kpiTotalProfiles');
+      const kpiAuth = document.getElementById('kpiAuthProfiles');
+      const kpiUnauth = document.getElementById('kpiUnauthProfiles');
+      const kpiBusy = document.getElementById('kpiBusyProfiles');
+
+      if (kpiTotal) kpiTotal.innerText = accounts.length;
+      if (kpiAuth) kpiAuth.innerText = authed;
+      if (kpiUnauth) kpiUnauth.innerText = unauthed;
+      if (kpiBusy) kpiBusy.innerText = busy;
+
+      if (accounts.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 48px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg);">' +
+          '<div style="font-size: 32px; margin-bottom: 12px;">👤</div>' +
+          '<h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px;">Chưa có Chrome Profile nào</h3>' +
+          '<p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Tạo profile mới để mở Chrome đăng nhập tài khoản Google Flow của bạn.</p>' +
+          '<button type="button" class="btn-primary" onclick="openCreateProfileModal()">➕ Thêm Profile Mới</button>' +
+        '</div>';
+        return;
+      }
+
+      let cardsHtml = '';
+      for (const a of accounts) {
+        const isAuthed = a.sessionStatus === 'authenticated';
+        const sessionBadge = isAuthed ? 'badge-success' : (a.sessionStatus === 'checking' ? 'badge-info' : 'badge-warning');
+        const sessionLabel = isAuthed ? 'Đã xác thực Google' : (a.sessionStatus === 'checking' ? 'Đang kiểm tra...' : 'Chưa đăng nhập');
+
+        const isBusy = a.isBusy;
+        const busyBadge = isBusy ? 'badge-warning' : 'badge-neutral';
+        const busyLabel = isBusy ? ('Đang bận (' + (a.activeOperation || 'Đang tạo') + ')') : 'Sẵn sàng';
+
+        const emailDisplay = a.observedPrincipal ? escapeHtml(a.observedPrincipal) : '<span style="color: var(--text-subtle); font-style: italic;">Chưa ghi nhận</span>';
+        const remoteProjId = a.remoteProjectId ? escapeHtml(a.remoteProjectId) : '';
+        const projectLink = remoteProjId 
+          ? '<a href="https://flow.google.com/project/' + remoteProjId + '" target="_blank" style="color: var(--primary); text-decoration: none; font-family: var(--font-mono); font-size: 11px;">' + remoteProjId.slice(0, 16) + '... ↗</a>' 
+          : '<span style="color: var(--text-subtle); font-style: italic;">Chưa liên kết</span>';
+
+        const diskStatus = a.profileExistsOnDisk 
+          ? '<span class="badge badge-neutral" style="font-size: 10.5px;">📁 Đã tạo trên đĩa</span>' 
+          : '<span class="badge badge-warning" style="font-size: 10.5px;">⚠️ Chưa có thư mục</span>';
+
+        const toggleChecked = a.enabled ? 'checked' : '';
+
+        cardsHtml += '<div class="profile-card" id="card-' + a.id + '">' +
+          '<div class="profile-card-top">' +
+            '<div class="profile-identity">' +
+              '<div class="profile-chrome-icon">🌐</div>' +
+              '<div>' +
+                '<h4 class="profile-label-title">' + escapeHtml(a.label) + '</h4>' +
+                '<div class="profile-id-sub">ID: ' + escapeHtml(a.id) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">' +
+              '<span class="badge ' + sessionBadge + '"><span class="badge-dot"></span> ' + sessionLabel + '</span>' +
+              '<span class="badge ' + busyBadge + '" style="font-size: 10.5px;"><span class="badge-dot"></span> ' + busyLabel + '</span>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="profile-details-list">' +
+            '<div class="profile-detail-row">' +
+              '<span class="detail-k">Google Email:</span>' +
+              '<span class="detail-v">' + emailDisplay + '</span>' +
+            '</div>' +
+            '<div class="profile-detail-row">' +
+              '<span class="detail-k">Flow Project:</span>' +
+              '<span class="detail-v">' + projectLink + '</span>' +
+            '</div>' +
+            '<div class="profile-detail-row">' +
+              '<span class="detail-k">Thư mục Profile:</span>' +
+              '<span class="detail-v" style="font-family: var(--font-mono); font-size: 11px;">' + escapeHtml(a.profilePath) + '</span>' +
+            '</div>' +
+            '<div class="profile-detail-row">' +
+              '<span class="detail-k">Trạng thái đĩa:</span>' +
+              '<span>' + diskStatus + '</span>' +
+            '</div>' +
+            '<div class="profile-detail-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border);">' +
+              '<span class="detail-k">Kích hoạt (Nhận Job):</span>' +
+              '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600;">' +
+                '<input type="checkbox" ' + toggleChecked + ' onchange="toggleAccountEnabled(\\'' + a.id + '\\', this.checked)" />' +
+                '<span>' + (a.enabled ? 'Đang bật' : 'Đang tắt') + '</span>' +
+              '</label>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="profile-actions-bar">' +
+            '<button type="button" class="profile-action-btn btn-login" onclick="triggerAccountLogin(\\'' + a.id + '\\', \\'' + escapeHtml(a.label) + '\\')">' +
+              '<span>🔑 Mở Chrome Đăng Nhập</span>' +
+            '</button>' +
+            '<button type="button" class="profile-action-btn" onclick="openEditProfileModal(\\'' + a.id + '\\')">' +
+              '<span>✏️ Sửa</span>' +
+            '</button>' +
+            '<button type="button" class="profile-action-btn" onclick="checkAccountSession(\\'' + a.id + '\\')">' +
+              '<span>🔄 Kiểm tra</span>' +
+            '</button>' +
+            '<button type="button" class="profile-action-btn" style="color: var(--danger);" onclick="openDeleteProfileModal(\\'' + a.id + '\\', \\'' + escapeHtml(a.label) + '\\', \\'' + escapeHtml(a.profilePath) + '\\')">' +
+              '<span>🗑️ Xóa</span>' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+      }
+
+      container.innerHTML = cardsHtml;
+    }
+
+    // ─── PROFILE CRUD ACTIONS ─────────────────────────────────────
+    function openCreateProfileModal() {
+      // Suggest account ID
+      const count = accountsDataCache.length + 1;
+      let candidateId = 'account-' + count;
+      while (accountsDataCache.some(a => a.id === candidateId)) {
+        candidateId = 'account-' + (++count);
+      }
+      document.getElementById('newAccountId').value = candidateId;
+      document.getElementById('newAccountLabel').value = 'Tài khoản ' + count;
+      document.getElementById('newRemoteProjectId').value = '';
+      document.getElementById('autoLaunchLogin').checked = true;
+      openModal('createProfileModal');
+    }
+
+    document.getElementById('createProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('newAccountId').value.trim();
+      const label = document.getElementById('newAccountLabel').value.trim();
+      const remoteProjectId = document.getElementById('newRemoteProjectId').value.trim() || undefined;
+      const autoLaunch = document.getElementById('autoLaunchLogin').checked;
+      const btn = document.getElementById('btnCreateProfileSubmit');
+
+      if (!id || !label) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Đang tạo...';
+
+      try {
+        const res = await fetch('/api/accounts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, label, remoteProjectId }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Lỗi khi tạo account');
+
+        closeModal('createProfileModal');
+        await fetchAccounts();
+
+        if (autoLaunch) {
+          triggerAccountLogin(id, label);
+        }
+      } catch (err) {
+        alert('Lỗi tạo profile: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Tạo Profile';
+      }
+    });
+
+    function openEditProfileModal(id) {
+      const acc = accountsDataCache.find(a => a.id === id);
+      if (!acc) return;
+
+      document.getElementById('editAccountId').value = acc.id;
+      document.getElementById('editAccountIdDisplay').value = acc.id;
+      document.getElementById('editAccountLabel').value = acc.label;
+      document.getElementById('editRemoteProjectId').value = acc.remoteProjectId || '';
+      document.getElementById('editAccountEnabled').checked = Boolean(acc.enabled);
+
+      openModal('editProfileModal');
+    }
+
+    document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('editAccountId').value;
+      const label = document.getElementById('editAccountLabel').value.trim();
+      const remoteProjectId = document.getElementById('editRemoteProjectId').value.trim() || '';
+      const enabled = document.getElementById('editAccountEnabled').checked;
+
+      try {
+        const res = await fetch('/api/accounts/' + encodeURIComponent(id), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ label, remoteProjectId, enabled }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Lỗi lưu thay đổi');
+
+        closeModal('editProfileModal');
+        await fetchAccounts();
+      } catch (err) {
+        alert('Lỗi cập nhật: ' + err.message);
+      }
+    });
+
+    function openDeleteProfileModal(id, label, profilePath) {
+      document.getElementById('deleteAccountId').innerText = id;
+      document.getElementById('deleteAccountName').innerText = label;
+      document.getElementById('deleteDiskPath').innerText = profilePath || ('data/profiles/' + id);
+      document.getElementById('deleteDiskCheckbox').checked = true;
+
+      const confirmBtn = document.getElementById('btnConfirmDelete');
+      confirmBtn.onclick = async () => {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="spinner"></span> Đang xóa...';
+        const deleteDisk = document.getElementById('deleteDiskCheckbox').checked;
+
+        try {
+          const res = await fetch('/api/accounts/' + encodeURIComponent(id) + '?deleteDisk=' + deleteDisk, {
+            method: 'DELETE',
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa profile');
+
+          closeModal('deleteProfileModal');
+          await fetchAccounts();
+        } catch (err) {
+          alert('Lỗi xóa profile: ' + err.message);
+        } finally {
+          confirmBtn.disabled = false;
+          confirmBtn.innerHTML = 'Xác Nhận Xóa';
+        }
+      };
+
+      openModal('deleteProfileModal');
+    }
+
+    async function toggleAccountEnabled(id, enabled) {
+      try {
+        const action = enabled ? 'enable' : 'disable';
+        await fetch('/api/accounts/' + encodeURIComponent(id) + '/' + action, { method: 'POST' });
+        await fetchAccounts();
+      } catch (err) {
+        alert('Lỗi cập nhật trạng thái: ' + err.message);
+      }
+    }
+
+    async function checkAccountSession(id) {
+      const card = document.getElementById('card-' + id);
+      if (card) {
+        const btn = card.querySelector('.btn-login');
+        if (btn) btn.innerHTML = '<span class="spinner"></span> Đang kiểm tra...';
+      }
+
+      try {
+        const res = await fetch('/api/accounts/' + encodeURIComponent(id) + '/check', { method: 'POST' });
+        const data = await res.json();
+        await fetchAccounts();
+        alert('Trạng thái phiên tài khoản ' + id + ': ' + (data.sessionStatus || 'Unknown'));
+      } catch (err) {
+        alert('Lỗi kiểm tra phiên: ' + err.message);
+      }
+    }
+
+    // Interactive Chrome Login Tracker
+    async function triggerAccountLogin(id, label) {
+      document.getElementById('loginModalTitle').innerText = '🔑 Đăng nhập: ' + (label || id);
+      document.getElementById('loginModalStatus').innerText = 'Đang khởi chạy trình duyệt Google Chrome...';
+      document.getElementById('loginModalHint').innerText = 'Cửa sổ Chrome thật vừa được mở trên màn hình. Hãy đăng nhập Google và mở 1 Project trên Google Flow để hoàn tất.';
+      document.getElementById('loginModalSpinner').innerHTML = '<span class="spinner" style="width: 32px; height: 32px;"></span>';
+      openModal('loginTrackerModal');
+
+      try {
+        const res = await fetch('/api/accounts/' + encodeURIComponent(id) + '/login', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Không thể mở Chrome');
+
+        // Poll login status
+        if (activeLoginPollingInterval) clearInterval(activeLoginPollingInterval);
+        activeLoginPollingInterval = setInterval(async () => {
+          try {
+            const statusRes = await fetch('/api/accounts/' + encodeURIComponent(id) + '/login-status');
+            const statusData = await statusRes.json();
+            const session = statusData.session;
+
+            if (session) {
+              if (session.message) {
+                document.getElementById('loginModalStatus').innerText = session.message;
+              }
+
+              if (session.status === 'succeeded') {
+                clearInterval(activeLoginPollingInterval);
+                activeLoginPollingInterval = null;
+                document.getElementById('loginModalSpinner').innerText = '🎉';
+                document.getElementById('loginModalStatus').innerText = 'Đăng nhập Google Flow thành công!';
+                document.getElementById('loginModalHint').innerText = 'Tài khoản đã sẵn sàng tạo ảnh trong hệ thống Flow Studio.';
+                await fetchAccounts();
+                setTimeout(() => closeModal('loginTrackerModal'), 3000);
+              } else if (session.status === 'failed' || session.status === 'error') {
+                clearInterval(activeLoginPollingInterval);
+                activeLoginPollingInterval = null;
+                document.getElementById('loginModalSpinner').innerText = '⚠️';
+                document.getElementById('loginModalStatus').innerText = 'Phiên đăng nhập dừng lại';
+                document.getElementById('loginModalHint').innerText = session.message || session.error || 'Cửa sổ trình duyệt đã bị đóng.';
+                await fetchAccounts();
+              }
+            }
+          } catch (e) {
+            console.error('Login status poll error:', e);
+          }
+        }, 2000);
+      } catch (err) {
+        alert('Lỗi kích hoạt Chrome login: ' + err.message);
+        closeModal('loginTrackerModal');
+      }
+    }
+
+    // ─── STUDIO T2I / I2I GENERATION HANDLER ──────────────────────
+    const promptInputEl = document.getElementById('prompt');
+    const promptCharCount = document.getElementById('promptCharCount');
+
+    function updateCharCount() {
+      const len = promptInputEl.value.length;
+      promptCharCount.innerText = len > 0 ? (len + ' ký tự') : '';
+    }
+    promptInputEl.addEventListener('input', updateCharCount);
+
+    function applyPrompt(text) {
+      promptInputEl.value = text;
+      updateCharCount();
+      promptInputEl.focus();
+    }
+
+    // Dropzone logic
+    const dropzoneBox = document.getElementById('dropzoneBox');
+    const fileInputEl = document.getElementById('refImage');
+    const preview = document.getElementById('dropzonePreview');
+    const thumb = document.getElementById('refImageThumb');
+    const dropText = document.getElementById('dropzoneText');
+    const modeBadge = document.getElementById('studioModeBadge');
+
+    dropzoneBox.addEventListener('click', () => fileInputEl.click());
+    dropzoneBox.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzoneBox.style.borderColor = 'var(--primary)';
+    });
+    dropzoneBox.addEventListener('dragleave', () => {
+      dropzoneBox.style.borderColor = 'var(--border-strong)';
+    });
+    dropzoneBox.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzoneBox.style.borderColor = 'var(--border-strong)';
+      if (e.dataTransfer.files.length > 0) {
+        fileInputEl.files = e.dataTransfer.files;
+        handleFileChosen(fileInputEl.files[0]);
+      }
+    });
+
+    fileInputEl.addEventListener('change', () => {
+      if (fileInputEl.files.length > 0) {
+        handleFileChosen(fileInputEl.files[0]);
+      }
+    });
+
+    function handleFileChosen(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        thumb.src = e.target.result;
+        preview.classList.add('active');
+        dropText.style.display = 'none';
+        if (modeBadge) {
+          modeBadge.className = 'badge badge-info';
+          modeBadge.innerText = 'Chế độ I2I (Reference)';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearRefImage() {
       fileInputEl.value = '';
       thumb.src = '';
       preview.classList.remove('active');
-      dropText.style.display = 'flex';
+      dropText.style.display = 'block';
       if (modeBadge) {
         modeBadge.className = 'badge badge-neutral';
         modeBadge.innerText = 'Chế độ T2I';
@@ -1164,28 +1867,22 @@ export function getDashboardHtml(): string {
     });
 
     // Modal Lightbox
-    function openModal(imgUrl, prompt) {
+    function openLightbox(imgUrl, prompt) {
       document.getElementById('modalImg').src = imgUrl;
       const promptEl = document.getElementById('modalPrompt');
       promptEl.innerText = prompt || '';
       promptEl.title = prompt || '';
       document.getElementById('modalDownloadBtn').href = imgUrl;
-      document.getElementById('imageModal').classList.add('active');
+      openModal('imageModal');
     }
 
-    function closeModal() {
-      document.getElementById('imageModal').classList.remove('active');
-    }
-
-    document.getElementById('imageModal').addEventListener('click', (e) => {
-      if (e.target.id === 'imageModal') closeModal();
-    });
-    document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('modalCloseBtn').addEventListener('click', () => closeModal('imageModal'));
     document.getElementById('modalReuseBtn').addEventListener('click', () => {
       const p = document.getElementById('modalPrompt').innerText;
       if (p) {
         applyPrompt(p);
-        closeModal();
+        closeModal('imageModal');
+        switchMainTab('studio');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });
@@ -1193,96 +1890,26 @@ export function getDashboardHtml(): string {
       document.getElementById('liveTracker').classList.remove('active');
     });
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        const submitBtn = document.getElementById('submitBtn');
-        if (submitBtn && !submitBtn.disabled) {
-          document.getElementById('jobForm').requestSubmit();
-        }
-      }
-    });
-
-    // Event delegation for chips, copy, and reuse buttons
+    // Delegation
     document.addEventListener('click', (e) => {
       const chip = e.target.closest('.prompt-chip');
       if (chip && chip.dataset.prompt) {
         applyPrompt(chip.dataset.prompt);
         return;
       }
-      const copyIdBtn = e.target.closest('.btn-copy-id');
-      if (copyIdBtn && copyIdBtn.dataset.id) {
-        copyToClipboard(copyIdBtn.dataset.id, copyIdBtn);
-        return;
-      }
-      const copyPromptBtn = e.target.closest('.btn-copy-prompt');
-      if (copyPromptBtn && copyPromptBtn.dataset.prompt) {
-        copyToClipboard(copyPromptBtn.dataset.prompt, copyPromptBtn);
-        return;
-      }
       const reusePromptBtn = e.target.closest('.btn-reuse-prompt');
       if (reusePromptBtn && reusePromptBtn.dataset.prompt) {
         applyPrompt(reusePromptBtn.dataset.prompt);
+        switchMainTab('studio');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
       const thumbImg = e.target.closest('.preview-clickable');
       if (thumbImg && thumbImg.dataset.url) {
-        openModal(thumbImg.dataset.url, thumbImg.dataset.prompt || '');
+        openLightbox(thumbImg.dataset.url, thumbImg.dataset.prompt || '');
         return;
       }
     });
-
-    function copyToClipboard(text, btn) {
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btn.innerText;
-        btn.innerText = '✓ Đã chép';
-        setTimeout(() => { btn.innerText = orig; }, 1500);
-      });
-    }
-
-    // Accounts Fetcher
-    async function fetchAccounts() {
-      try {
-        const res = await fetch('/api/accounts');
-        const data = await res.json();
-        const tbody = document.getElementById('accountsTbody');
-        const poolSummary = document.getElementById('poolSummary');
-        const metricAccounts = document.getElementById('metricAccountsCount');
-
-        const accounts = data.accounts || [];
-        poolSummary.innerText = accounts.length + ' tài khoản';
-
-        let availableCount = 0;
-        let html = '';
-        for (const a of accounts) {
-          const isAuthed = a.sessionStatus === 'authenticated';
-          const sessionBadge = isAuthed ? 'badge-success' : 'badge-warning';
-          const isBusy = a.isBusy;
-          if (!isBusy && isAuthed) availableCount++;
-
-          const busyBadge = isBusy ? 'badge-warning' : 'badge-success';
-          const busyText = isBusy ? ('Bận (' + (a.activeOperation || 'Đang tạo') + ')') : 'Sẵn sàng';
-
-          html += '<tr>' +
-            '<td style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;">' + a.id + '</td>' +
-            '<td><span style="font-weight: 500;">' + a.label + '</span></td>' +
-            '<td><span class="badge ' + sessionBadge + '"><span class="badge-dot"></span> ' + a.sessionStatus + '</span></td>' +
-            '<td><span class="badge ' + busyBadge + '"><span class="badge-dot"></span> ' + busyText + '</span></td>' +
-          '</tr>';
-        }
-
-        if (metricAccounts) {
-          metricAccounts.innerText = availableCount + '/' + accounts.length;
-        }
-
-        if (tbody.innerHTML !== html) {
-          tbody.innerHTML = html || '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chưa có tài khoản nào được kết nối.</td></tr>';
-        }
-      } catch (e) {
-        console.error('Error fetching accounts:', e);
-      }
-    }
 
     // Filter & Search Handlers for Jobs
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1300,12 +1927,6 @@ export function getDashboardHtml(): string {
       renderFilteredJobs();
     });
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    // Render Jobs Table from in-memory state
     function renderFilteredJobs() {
       const jobsTbody = document.getElementById('jobsTbody');
       let filtered = allFetchedJobs;
@@ -1321,226 +1942,106 @@ export function getDashboardHtml(): string {
         );
       }
 
-      let jobsHtml = '';
-      for (const j of filtered) {
-        let badgeClass = 'badge-info';
-        let statusLabel = j.status;
-        if (j.status === 'succeeded') { badgeClass = 'badge-success'; statusLabel = '✅ Xong'; }
-        else if (j.status === 'running') { badgeClass = 'badge-warning'; statusLabel = '⚙️ Đang chạy'; }
-        else if (j.status === 'failed') { badgeClass = 'badge-danger'; statusLabel = '❌ Lỗi'; }
-        else if (j.status === 'queued') { badgeClass = 'badge-info'; statusLabel = '⏳ Chờ duyệt'; }
+      let html = '';
+      for (const job of filtered) {
+        const isSuccess = job.status === 'succeeded';
+        const isRunning = job.status === 'running' || job.status === 'queued';
+        const statusBadge = isSuccess ? 'badge-success' : (isRunning ? 'badge-info' : 'badge-danger');
+        const statusIcon = isSuccess ? '✓' : (isRunning ? '<span class="spinner"></span>' : '✕');
 
-        const timeStr = j.created_at ? new Date(j.created_at).toLocaleTimeString() : '';
-        const shortId = j.id ? (j.id.length > 18 ? ('...' + j.id.slice(-8)) : j.id) : '';
-
-        // Clean horizontal filmstrip of output thumbnails with direct preview
-        let previewHtml = '<span style="color: var(--text-muted); font-size: 11.5px;">Chưa có</span>';
-        if (j.outputs && j.outputs.length > 0) {
-          previewHtml = '<div class="job-thumb-strip">';
-          for (let idx = 0; idx < j.outputs.length; idx++) {
-            const out = j.outputs[idx];
-            if (out.imageUrl) {
-              const cleanPrompt = escapeHtml(j.prompt || '');
-              const downloadName = (j.prompt ? j.prompt.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '_') : 'image') + '-' + (idx + 1) + '.png';
-              previewHtml += '<div class="job-thumb-cell" title="Bấm để phóng to ảnh">' +
-                '<img src="' + out.imageUrl + '" class="preview-clickable" data-url="' + out.imageUrl + '" data-prompt="' + cleanPrompt + '" alt="Thumbnail" />' +
-                '<a href="' + out.imageUrl + '" download="' + downloadName + '" class="job-thumb-dl" title="Tải ảnh này">⬇</a>' +
-              '</div>';
-            }
+        let thumbsHtml = '';
+        if (job.outputs && job.outputs.length > 0) {
+          thumbsHtml = '<div class="job-thumb-strip">';
+          for (let i = 0; i < job.outputs.length; i++) {
+            const out = job.outputs[i];
+            const cleanPrompt = escapeHtml(job.prompt || '');
+            thumbsHtml += '<div class="job-thumb-cell">' +
+              '<img src="' + out.imageUrl + '" class="preview-clickable" data-url="' + out.imageUrl + '" data-prompt="' + cleanPrompt + '" alt="Output ' + (i + 1) + '" />' +
+            '</div>';
           }
-          previewHtml += '</div>';
+          thumbsHtml += '</div>';
+        } else {
+          thumbsHtml = '<span style="color: var(--text-subtle); font-size: 11.5px;">Chưa có ảnh</span>';
         }
 
-        const safePrompt = escapeHtml(j.prompt || '');
-        jobsHtml += '<tr>' +
+        const dateStr = new Date(job.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        html += '<tr>' +
+          '<td style="font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;">' + escapeHtml(job.id) + '</td>' +
           '<td>' +
-            '<span style="font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text); display: block;" title="' + escapeHtml(j.id) + '">' + shortId + '</span>' +
-            '<button type="button" class="btn-copy-id btn-copy-prompt" data-id="' + escapeHtml(j.id) + '" title="Chép ID đầy đủ">📋 Chép ID</button>' +
+            '<div class="prompt-preview" title="' + escapeHtml(job.prompt) + '">' + escapeHtml(job.prompt) + '</div>' +
+            '<button type="button" class="btn-quiet btn-reuse-prompt" data-prompt="' + escapeHtml(job.prompt) + '" style="padding: 2px 6px; font-size: 10px; margin-top: 4px;">⚡ Dùng lại</button>' +
           '</td>' +
-          '<td>' +
-            '<div class="prompt-preview" title="' + safePrompt + '">' + (safePrompt || 'Không có prompt') + '</div>' +
-            '<div style="display: flex; gap: 6px; margin-top: 4px;">' +
-              '<button type="button" class="btn-copy-prompt" data-prompt="' + safePrompt + '">📋 Chép Prompt</button>' +
-              '<button type="button" class="btn-reuse-prompt btn-copy-prompt" data-prompt="' + safePrompt + '">⚡ Dùng lại</button>' +
-            '</div>' +
-          '</td>' +
-          '<td><span class="badge ' + badgeClass + '"><span class="badge-dot"></span> ' + statusLabel + '</span></td>' +
-          '<td>' + previewHtml + '</td>' +
-          '<td style="color: var(--text-muted); font-size: 11.5px; white-space: nowrap;">' + timeStr + '</td>' +
+          '<td><span class="badge ' + statusBadge + '">' + statusIcon + ' ' + escapeHtml(job.status) + '</span></td>' +
+          '<td>' + thumbsHtml + '</td>' +
+          '<td style="font-size: 11.5px; color: var(--text-muted);">' + dateStr + '</td>' +
         '</tr>';
       }
 
-      jobsTbody.innerHTML = jobsHtml || '<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Không tìm thấy công việc nào phù hợp.</td></tr>';
+      jobsTbody.innerHTML = html || '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Không tìm thấy yêu cầu nào.</td></tr>';
     }
 
-    // Fetch Jobs & Gallery differential append
+    // Fetch Jobs & Gallery
     async function fetchJobsAndGallery() {
       try {
-        const res = await fetch('/api/jobs?limit=50');
+        const res = await fetch('/api/jobs');
         const data = await res.json();
         const jobs = data.jobs || [];
         allFetchedJobs = jobs;
 
-        // Update Queue metric
-        const queuedOrRunning = jobs.filter(j => j.status === 'queued' || j.status === 'running').length;
         const metricQueue = document.getElementById('metricQueueCount');
-        if (metricQueue) metricQueue.innerText = queuedOrRunning;
+        if (metricQueue) {
+          const queued = jobs.filter(j => j.status === 'queued' || j.status === 'running').length;
+          metricQueue.innerText = queued;
+        }
 
-        // Render Jobs Table
         renderFilteredJobs();
 
-        // Differential append to Gallery
+        // Render Gallery
         const gallery = document.getElementById('gallery');
-        for (const j of jobs) {
-          if (j.outputs && j.outputs.length > 0) {
-            for (const out of j.outputs) {
-              if (out.imageUrl && !renderedAssetKeys.has(out.imageUrl)) {
-                renderedAssetKeys.add(out.imageUrl);
+        const galleryCountEl = document.getElementById('galleryCount');
+        const metricGalleryCount = document.getElementById('metricGalleryCount');
 
+        let totalOutputs = 0;
+        for (const job of jobs) {
+          if (job.status === 'succeeded' && job.outputs) {
+            for (const out of job.outputs) {
+              totalOutputs++;
+              const key = out.imageUrl;
+              if (!renderedAssetKeys.has(key)) {
+                renderedAssetKeys.add(key);
                 const card = document.createElement('div');
                 card.className = 'gallery-card';
-                
-                const img = document.createElement('img');
-                img.src = out.imageUrl;
-                img.alt = j.prompt || 'Flow Studio Output';
-                img.title = j.prompt || '';
-                img.onclick = () => openModal(out.imageUrl, j.prompt);
-
-                const overlay = document.createElement('div');
-                overlay.className = 'gallery-card-overlay';
-
-                const topBadge = document.createElement('span');
-                topBadge.className = 'badge badge-neutral gallery-top-badge';
-                topBadge.innerText = 'Imagen 3';
-
-                const bottomWrap = document.createElement('div');
-
-                const cap = document.createElement('div');
-                cap.className = 'gallery-card-caption';
-                cap.innerText = j.prompt || 'Ảnh mới tạo';
-
-                const actions = document.createElement('div');
-                actions.className = 'gallery-card-actions';
-
-                const reuseBtn = document.createElement('button');
-                reuseBtn.type = 'button';
-                reuseBtn.className = 'gallery-action-btn';
-                reuseBtn.innerText = '⚡ Dùng prompt';
-                reuseBtn.onclick = (e) => {
-                  e.stopPropagation();
-                  applyPrompt(j.prompt || '');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                };
-
-                const dl = document.createElement('a');
-                dl.href = out.imageUrl;
-                dl.download = 'flow-image-' + Date.now() + '.png';
-                dl.className = 'gallery-action-btn';
-                dl.innerText = '⬇ Tải về';
-                dl.onclick = (e) => e.stopPropagation();
-
-                actions.appendChild(reuseBtn);
-                actions.appendChild(dl);
-
-                bottomWrap.appendChild(cap);
-                bottomWrap.appendChild(actions);
-
-                overlay.appendChild(topBadge);
-                overlay.appendChild(bottomWrap);
-
-                card.appendChild(img);
-                card.appendChild(overlay);
-                gallery.insertBefore(card, gallery.firstChild);
+                const cleanPrompt = escapeHtml(job.prompt || '');
+                card.innerHTML = 
+                  '<img src="' + out.imageUrl + '" class="preview-clickable" data-url="' + out.imageUrl + '" data-prompt="' + cleanPrompt + '" alt="Generated Image" />' +
+                  '<div class="gallery-card-overlay">' +
+                    '<span class="badge badge-success" style="font-size: 10px;">Imagen 3</span>' +
+                    '<div style="margin-top: auto;">' +
+                      '<p class="prompt-preview" style="color: #fff; font-size: 11.5px; margin-bottom: 6px;">' + cleanPrompt + '</p>' +
+                      '<div style="display: flex; gap: 6px;">' +
+                        '<button type="button" class="btn-quiet btn-reuse-prompt" data-prompt="' + cleanPrompt + '" style="padding: 2px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4);">⚡ Dùng prompt</button>' +
+                        '<a href="' + out.imageUrl + '" download="flow-image.png" class="btn-quiet" style="padding: 2px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4); text-decoration: none;">⬇ Tải về</a>' +
+                      '</div>' +
+                    '</div>' +
+                  '</div>';
+                gallery.prepend(card);
               }
             }
           }
         }
 
-        const countText = renderedAssetKeys.size + ' ảnh';
-        document.getElementById('galleryCount').innerText = countText;
-        const metricGallery = document.getElementById('metricGalleryCount');
-        if (metricGallery) metricGallery.innerText = renderedAssetKeys.size;
+        if (galleryCountEl) galleryCountEl.innerText = totalOutputs + ' ảnh';
+        if (metricGalleryCount) metricGalleryCount.innerText = totalOutputs;
       } catch (e) {
         console.error('Error fetching jobs:', e);
       }
     }
 
-    // Live poller for an active job
-    async function startJobTracking(jobId, promptText) {
-      currentPollingJobId = jobId;
-      const tracker = document.getElementById('liveTracker');
-      const trackerTitle = document.getElementById('trackerTitle');
-      const trackerBadge = document.getElementById('trackerBadge');
-      const trackerDesc = document.getElementById('trackerDesc');
-      const trackerJobId = document.getElementById('trackerJobId');
-      const trackerOutputs = document.getElementById('trackerOutputs');
-
-      tracker.classList.add('active');
-      trackerTitle.innerText = '⚙️ Đang xử lý: "' + (promptText.length > 36 ? promptText.slice(0, 36) + '...' : promptText) + '"';
-      trackerJobId.innerText = 'Job ID: ' + jobId;
-      trackerBadge.className = 'badge badge-info';
-      trackerBadge.innerHTML = '<span class="spinner"></span> Đang xếp hàng';
-      trackerDesc.innerText = 'Đang chuyển giao yêu cầu cho tài khoản rảnh rỗi trong Account Pool...';
-      trackerOutputs.innerHTML = '';
-
-      let elapsed = 0;
-      const pollInterval = setInterval(async () => {
-        elapsed += 2;
-        try {
-          const res = await fetch('/api/jobs/' + jobId);
-          if (!res.ok) return;
-          const data = await res.json();
-          const job = data.job;
-
-          if (job.status === 'running') {
-            trackerBadge.className = 'badge badge-warning';
-            trackerBadge.innerHTML = '<span class="spinner"></span> Đang vẽ ảnh (' + elapsed + 's)';
-            trackerDesc.innerText = 'Google Flow đang dựng ảnh trên canvas... Thường mất 20 - 45 giây.';
-          } else if (job.status === 'succeeded') {
-            clearInterval(pollInterval);
-            trackerBadge.className = 'badge badge-success';
-            trackerBadge.innerHTML = '✅ Hoàn tất (' + elapsed + 's)';
-            
-            let outsHtml = '<div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">' +
-              '<strong style="font-size: 13px; color: var(--text); display: block; margin-bottom: 8px;">🎉 Ảnh vừa tạo thành công:</strong>' +
-              '<div style="display: flex; gap: 12px; flex-wrap: wrap;">';
-            if (data.outputs && data.outputs.length > 0) {
-              for (let i = 0; i < data.outputs.length; i++) {
-                const out = data.outputs[i];
-                if (out.imageUrl) {
-                  const cleanPrompt = escapeHtml(job.prompt || '');
-                  const downloadName = (job.prompt ? job.prompt.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '_') : 'image') + '-' + (i + 1) + '.png';
-                  outsHtml += '<div style="background: var(--surface); padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px;">' +
-                    '<img src="' + out.imageUrl + '" style="max-height: 150px; max-width: 220px; border-radius: var(--radius-sm); cursor: pointer; object-fit: cover;" class="preview-clickable" data-url="' + out.imageUrl + '" data-prompt="' + cleanPrompt + '" alt="Result" />' +
-                    '<a href="' + out.imageUrl + '" download="' + downloadName + '" class="btn-quiet" style="font-weight: 600; width: 100%; justify-content: center;">⬇ Tải file PNG</a>' +
-                  '</div>';
-                }
-              }
-            }
-            outsHtml += '</div></div>';
-            trackerOutputs.innerHTML = outsHtml;
-            trackerDesc.innerText = 'Đã trích xuất xong ' + (data.outputs ? data.outputs.length : 0) + ' ảnh mới nét căng!';
-            
-            await fetchJobsAndGallery();
-            await fetchAccounts();
-          } else if (job.status === 'failed') {
-            clearInterval(pollInterval);
-            trackerBadge.className = 'badge badge-danger';
-            trackerBadge.innerHTML = '❌ Thất bại';
-            const errMsg = data.attempts && data.attempts[0] ? data.attempts[0].error_message : 'Lỗi không xác định';
-            trackerDesc.innerText = 'Chi tiết lỗi: ' + errMsg;
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }, 2000);
-    }
-
-    // Submit form handler
+    // Job Form Submission
     document.getElementById('jobForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const promptInput = document.getElementById('prompt');
-      const prompt = promptInput.value.trim();
+      const prompt = promptInputEl.value.trim();
       const fileInput = document.getElementById('refImage');
       const submitBtn = document.getElementById('submitBtn');
 
@@ -1575,7 +2076,7 @@ export function getDashboardHtml(): string {
 
         const jobData = await jobRes.json();
         if (jobData.jobId) {
-          promptInput.value = '';
+          promptInputEl.value = '';
           updateCharCount();
           clearRefImage();
           startJobTracking(jobData.jobId, prompt);
@@ -1592,7 +2093,76 @@ export function getDashboardHtml(): string {
       }
     });
 
-    // Initial load & Polling
+    // Tracking
+    function startJobTracking(jobId, prompt) {
+      currentPollingJobId = jobId;
+      const tracker = document.getElementById('liveTracker');
+      const trackerDesc = document.getElementById('trackerDesc');
+      const trackerOutputs = document.getElementById('trackerOutputs');
+      const trackerBadge = document.getElementById('trackerBadge');
+
+      tracker.classList.add('active');
+      trackerDesc.innerText = 'Job ' + jobId + ' đã vào hàng đợi, chờ Account điều phối...';
+      trackerOutputs.innerHTML = '';
+      trackerBadge.className = 'badge badge-info';
+      trackerBadge.innerHTML = '<span class="spinner"></span> Đang xử lý';
+
+      const startTime = Date.now();
+      const pollInterval = setInterval(async () => {
+        if (currentPollingJobId !== jobId) {
+          clearInterval(pollInterval);
+          return;
+        }
+
+        try {
+          const res = await fetch('/api/jobs/' + jobId);
+          const data = await res.json();
+          const job = data.job;
+
+          if (!job) return;
+
+          const elapsed = Math.floor((Date.now() - startTime) / 1000);
+          trackerDesc.innerText = 'Trạng thái: ' + job.status + ' (' + elapsed + 's)';
+
+          if (job.status === 'succeeded') {
+            clearInterval(pollInterval);
+            trackerBadge.className = 'badge badge-success';
+            trackerBadge.innerHTML = '✅ Hoàn tất (' + elapsed + 's)';
+            
+            let outsHtml = '<div style="margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px;">' +
+              '<strong style="font-size: 13px; color: var(--text); display: block; margin-bottom: 8px;">🎉 Ảnh vừa tạo thành công:</strong>' +
+              '<div style="display: flex; gap: 12px; flex-wrap: wrap;">';
+            if (data.outputs && data.outputs.length > 0) {
+              for (let i = 0; i < data.outputs.length; i++) {
+                const out = data.outputs[i];
+                if (out.imageUrl) {
+                  const cleanPrompt = escapeHtml(job.prompt || '');
+                  outsHtml += '<div style="background: var(--surface); padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 8px;">' +
+                    '<img src="' + out.imageUrl + '" style="max-height: 150px; max-width: 220px; border-radius: var(--radius-sm); cursor: pointer; object-fit: cover;" class="preview-clickable" data-url="' + out.imageUrl + '" data-prompt="' + cleanPrompt + '" alt="Result" />' +
+                    '<a href="' + out.imageUrl + '" download="flow-image.png" class="btn-quiet" style="font-weight: 600; width: 100%; justify-content: center;">⬇ Tải file PNG</a>' +
+                  '</div>';
+                }
+              }
+            }
+            outsHtml += '</div></div>';
+            trackerOutputs.innerHTML = outsHtml;
+            
+            await fetchJobsAndGallery();
+            await fetchAccounts();
+          } else if (job.status === 'failed') {
+            clearInterval(pollInterval);
+            trackerBadge.className = 'badge badge-danger';
+            trackerBadge.innerHTML = '❌ Thất bại';
+            const errMsg = data.attempts && data.attempts[0] ? data.attempts[0].error_message : 'Lỗi không xác định';
+            trackerDesc.innerText = 'Chi tiết lỗi: ' + errMsg;
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 2000);
+    }
+
+    // Initial Load & Polling
     fetchAccounts();
     fetchJobsAndGallery();
     setInterval(fetchAccounts, 4000);

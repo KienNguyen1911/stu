@@ -108,12 +108,38 @@ test("ApiServer serves health, accounts, assets upload, blob download, and jobs 
     assert.equal(detailData.inputs.length, 1);
     assert.equal(detailData.inputs[0].asset_id, uploadData.assetId);
 
-    // 8. Dashboard HTML
+    // 8. Update account
+    const updateRes = await fetch(`${baseUrl}/api/accounts/api-test-acc`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label: "Updated Label", enabled: true }),
+    });
+    assert.equal(updateRes.status, 200);
+    const updateData = (await updateRes.json()) as any;
+    assert.equal(updateData.account.label, "Updated Label");
+
+    // 9. Check login status endpoint
+    const statusRes = await fetch(`${baseUrl}/api/accounts/api-test-acc/login-status`);
+    assert.equal(statusRes.status, 200);
+    const statusData = (await statusRes.json()) as any;
+    assert.equal(statusData.session.status, "idle");
+
+    // 10. Dashboard HTML
     const dashRes = await fetch(`${baseUrl}/`);
     assert.equal(dashRes.status, 200);
     assert.ok(dashRes.headers.get("content-type")?.includes("text/html"));
     const html = await dashRes.text();
-    assert.ok(html.includes("Flow Studio Core API"));
+    assert.ok(html.includes("Flow Studio Core"));
+    assert.ok(html.includes("Chrome Profiles"));
+
+    // 11. Delete account
+    const delRes = await fetch(`${baseUrl}/api/accounts/api-test-acc`, {
+      method: "DELETE",
+    });
+    assert.equal(delRes.status, 200);
+    const afterListRes = await fetch(`${baseUrl}/api/accounts`);
+    const afterListData = (await afterListRes.json()) as any;
+    assert.equal(afterListData.accounts.length, 0);
   } finally {
     await server.stop();
     db.close();
