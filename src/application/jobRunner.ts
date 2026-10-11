@@ -121,7 +121,7 @@ export class JobRunner {
 
     let binding = targetBinding;
     if (!binding) {
-      const row = this.db.db
+      let row = this.db.db
         .prepare(
           `SELECT b.*, a.profile_path, a.session_epoch 
            FROM project_bindings b
@@ -130,6 +130,18 @@ export class JobRunner {
            LIMIT 1`,
         )
         .get(job.project_id) as any;
+
+      if (!row || !row.remote_project_id) {
+        row = this.db.db
+          .prepare(
+            `SELECT b.*, a.profile_path, a.session_epoch 
+             FROM project_bindings b
+             JOIN accounts a ON b.account_id = a.id
+             WHERE b.archived_at IS NULL AND a.enabled = 1 AND b.remote_project_id IS NOT NULL
+             LIMIT 1`,
+          )
+          .get() as any;
+      }
 
       if (!row || !row.remote_project_id) {
         throw new Error(

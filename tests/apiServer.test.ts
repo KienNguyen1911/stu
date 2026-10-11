@@ -132,7 +132,59 @@ test("ApiServer serves health, accounts, assets upload, blob download, and jobs 
     assert.ok(html.includes("Flow Studio Core"));
     assert.ok(html.includes("Chrome Profiles"));
 
-    // 11. Delete account
+    // 11. Test Projects CRUD and Assets deduplication & library
+    // 11a. List assets
+    const assetsListRes = await fetch(`${baseUrl}/api/assets`);
+    assert.equal(assetsListRes.status, 200);
+    const assetsListData = (await assetsListRes.json()) as any;
+    assert.equal(assetsListData.assets.length, 1);
+    assert.equal(assetsListData.assets[0].id, uploadData.assetId);
+    assert.equal(assetsListData.assets[0].usedInJobsCount, 1);
+
+    // 11b. Upload duplicate asset (same SHA-256)
+    const dupeRes = await fetch(`${baseUrl}/api/assets/upload`, {
+      method: "POST",
+      headers: { "Content-Type": "image/png", "x-display-name": "Reused Sample Asset" },
+      body: sampleBytes,
+    });
+    assert.equal(dupeRes.status, 200);
+    const dupeData = (await dupeRes.json()) as any;
+    assert.equal(dupeData.isDuplicate, true);
+    assert.equal(dupeData.assetId, uploadData.assetId);
+
+    // 11c. List projects
+    const listProjectsRes = await fetch(`${baseUrl}/api/projects`);
+    assert.equal(listProjectsRes.status, 200);
+    const listProjectsData = (await listProjectsRes.json()) as any;
+    assert.ok(listProjectsData.projects.length >= 1);
+    const foundProj = listProjectsData.projects.find((p: any) => p.id === "proj-api");
+    assert.ok(foundProj);
+    assert.equal(foundProj.name, "Project API");
+    assert.equal(foundProj.job_count, 1);
+
+    // 11d. Update project
+    const updateProjRes = await fetch(`${baseUrl}/api/projects/proj-api`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "Updated Project API", accountId: "api-test-acc", remoteProjectId: "remote-flow-uuid" }),
+    });
+    assert.equal(updateProjRes.status, 200);
+    const updateProjData = (await updateProjRes.json()) as any;
+    assert.equal(updateProjData.project.name, "Updated Project API");
+    assert.equal(updateProjData.project.remote_project_id, "remote-flow-uuid");
+
+    // 11e. Delete project
+    const delProjRes = await fetch(`${baseUrl}/api/projects/proj-api`, { method: "DELETE" });
+    assert.equal(delProjRes.status, 200);
+
+    // 11f. Delete asset
+    const delAssetRes = await fetch(`${baseUrl}/api/assets/${uploadData.assetId}`, { method: "DELETE" });
+    assert.equal(delAssetRes.status, 200);
+    const afterDelAssetRes = await fetch(`${baseUrl}/api/assets`);
+    const afterDelAssetData = (await afterDelAssetRes.json()) as any;
+    assert.equal(afterDelAssetData.assets.length, 0);
+
+    // 12. Delete account
     const delRes = await fetch(`${baseUrl}/api/accounts/api-test-acc`, {
       method: "DELETE",
     });

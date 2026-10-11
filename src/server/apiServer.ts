@@ -354,21 +354,38 @@ export class ApiServer {
       // 3. Projects & Bindings
       if (method === "GET" && pathname === "/api/projects") {
         const projects = this.db.db
-          .prepare("SELECT * FROM projects ORDER BY created_at DESC")
+          .prepare(`
+            SELECT p.*,
+                   COUNT(DISTINCT j.id) as job_count,
+                   b.id as binding_id,
+                   b.account_id,
+                   a.label as account_label,
+                   b.remote_project_id
+            FROM projects p
+            LEFT JOIN jobs j ON p.id = j.project_id
+            LEFT JOIN project_bindings b ON p.id = b.project_id AND b.archived_at IS NULL
+            LEFT JOIN accounts a ON b.account_id = a.id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+          `)
           .all() as any[];
         const bindings = this.db.db
           .prepare("SELECT * FROM project_bindings WHERE archived_at IS NULL")
           .all() as any[];
-        return this.sendJson(res, 200, { projects, bindings });
+        const accounts = this.db.db
+          .prepare("SELECT id, label, session_status, enabled FROM accounts ORDER BY created_at ASC")
+          .all() as any[];
+        return this.sendJson(res, 200, { projects, bindings, accounts });
       }
 
       if (method === "POST" && pathname === "/api/projects") {
         const body = await this.readJsonBody(req);
-        if (!body.id || !body.name) {
+        if (!body.name) {
           return this.sendJson(res, 400, {
-            error: "Missing required fields: 'id', 'name'",
+            error: "Missing required field: 'name'",
           });
         }
+        const projId = body.id || `proj-${Date.now()}`;
         const now = new Date().toISOString();
         this.db.transaction(() => {
           this.db.db
@@ -376,9 +393,90 @@ export class ApiServer {
               `INSERT INTO projects (id, name, description, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?)`,
             )
-            .run(body.id, body.name, body.description || null, now, now);
+            .run(projId, body.name, body.description || null, now, now);
+
+          if (body.accountId && body.remoteProjectId) {
+            const bindingId = `bind-${Date.now()}`;
+            this.db.db
+              .prepare(
+                `INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, 'verified', ?, ?)`,
+              )
+              .run(bindingId, projId, body.accountId, body.remoteProjectId, now, now);
+          }
         });
-        return this.sendJson(res, 201, { projectId: body.id, name: body.name });
+        const createdProject = this.db.db.prepare("SELECT * FROM projects WHERE id = ?").get(projId);
+        return this.sendJson(res, 201, { project: createdProject, projectId: projId, name: body.name });
+      }
+
+      const projectItemMatch = pathname.match(/^\/api\/projects\/([^/]+)$/);
+      if (projectItemMatch) {
+        const projId = projectItemMatch[1]!;
+
+        if (method === "GET") {
+          const project = this.db.db
+            .prepare("SELECT * FROM projects WHERE id = ?")
+            .get(projId);
+          if (!project) return this.sendJson(res, 404, { error: `Project not found: ${projId}` });
+          const bindings = this.db.db
+            .prepare("SELECT * FROM project_bindings WHERE project_id = ? AND archived_at IS NULL")
+            .all(projId);
+          return this.sendJson(res, 200, { project, bindings });
+        }
+
+        if (method === "PUT" || method === "PATCH") {
+          const body = await this.readJsonBody(req);
+          const now = new Date().toISOString();
+          this.db.transaction(() => {
+            if (body.name !== undefined) {
+              this.db.db
+                .prepare("UPDATE projects SET name = ?, description = ?, updated_at = ? WHERE id = ?")
+                .run(body.name, body.description ?? null, now, projId);
+            }
+            if (body.accountId !== undefined || body.remoteProjectId !== undefined) {
+              const existingBinding = this.db.db
+                .prepare("SELECT id, account_id, remote_project_id FROM project_bindings WHERE project_id = ? AND archived_at IS NULL")
+                .get(projId) as { id: string; account_id: string; remote_project_id: string } | undefined;
+              if (existingBinding) {
+                const accId = body.accountId !== undefined ? (body.accountId || null) : existingBinding.account_id;
+                const remId = body.remoteProjectId !== undefined ? (body.remoteProjectId || null) : existingBinding.remote_project_id;
+                if (!accId && !remId) {
+                  this.db.db.prepare("DELETE FROM project_bindings WHERE id = ?").run(existingBinding.id);
+                } else {
+                  this.db.db
+                    .prepare("UPDATE project_bindings SET account_id = ?, remote_project_id = ?, updated_at = ? WHERE id = ?")
+                    .run(accId, remId, now, existingBinding.id);
+                }
+              } else if (body.accountId) {
+                const bindingId = `bind-${Date.now()}`;
+                const remId = body.remoteProjectId || null;
+                this.db.db
+                  .prepare("INSERT INTO project_bindings (id, project_id, account_id, remote_project_id, setup_state, created_at, updated_at) VALUES (?, ?, ?, ?, 'verified', ?, ?)")
+                  .run(bindingId, projId, body.accountId, remId, now, now);
+              }
+            }
+          });
+          const updatedProject = this.db.db
+            .prepare(
+              `SELECT p.*, pb.account_id, pb.remote_project_id, a.label as account_label
+               FROM projects p
+               LEFT JOIN project_bindings pb ON p.id = pb.project_id AND pb.archived_at IS NULL
+               LEFT JOIN accounts a ON pb.account_id = a.id
+               WHERE p.id = ?`,
+            )
+            .get(projId);
+          return this.sendJson(res, 200, { success: true, project: updatedProject, projectId: projId });
+        }
+
+        if (method === "DELETE") {
+          if (projId === "proj-default") {
+            return this.sendJson(res, 400, { error: "Không thể xoá project mặc định (proj-default)" });
+          }
+          this.db.transaction(() => {
+            this.db.db.prepare("DELETE FROM projects WHERE id = ?").run(projId);
+          });
+          return this.sendJson(res, 200, { success: true, deletedProjectId: projId });
+        }
       }
 
       const projectBindingsMatch = pathname.match(
@@ -417,8 +515,35 @@ export class ApiServer {
       }
 
       // 4. Asset Ingestion & Blobs
+      if (method === "GET" && pathname === "/api/assets") {
+        const assets = this.db.db
+          .prepare(`
+            SELECT a.id, a.content_hash, a.blob_key, a.mime_type, a.size_bytes, a.created_at,
+                   COUNT(DISTINCT ji.job_id) as used_in_jobs_count,
+                   pa.display_name, pa.project_id
+            FROM assets a
+            LEFT JOIN job_inputs ji ON a.id = ji.asset_id
+            LEFT JOIN project_assets pa ON a.id = pa.asset_id
+            GROUP BY a.id
+            ORDER BY a.created_at DESC
+          `)
+          .all() as any[];
+
+        const enriched = assets.map(a => ({
+          ...a,
+          blobUrl: `/api/assets/${a.id}/blob`,
+          displayName: a.display_name || `Asset ${a.id.slice(-6)}`,
+          usedInJobsCount: Number(a.used_in_jobs_count || 0),
+        }));
+
+        return this.sendJson(res, 200, { assets: enriched });
+      }
+
       if (method === "POST" && pathname === "/api/assets/upload") {
         const contentType = req.headers["content-type"] || "";
+        const urlObj = new URL(req.url || "/", "http://localhost");
+        let displayName = urlObj.searchParams.get("displayName") || (req.headers["x-display-name"] as string) || "Reference Image";
+        let targetProjectId = urlObj.searchParams.get("projectId") || null;
         let buffer: Buffer;
 
         if (contentType.includes("application/json")) {
@@ -429,6 +554,8 @@ export class ApiServer {
             });
           }
           buffer = Buffer.from(body.data, "base64");
+          if (body.displayName) displayName = body.displayName;
+          if (body.projectId) targetProjectId = body.projectId;
         } else {
           buffer = await this.readRawBody(req);
         }
@@ -446,9 +573,10 @@ export class ApiServer {
         let assetId = assetRow
           ? assetRow.id
           : `asset-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-        if (!assetRow) {
-          const now = new Date().toISOString();
-          this.db.transaction(() => {
+        const now = new Date().toISOString();
+
+        this.db.transaction(() => {
+          if (!assetRow) {
             this.db.db
               .prepare(
                 `INSERT INTO assets (id, content_hash, blob_key, mime_type, size_bytes, availability, created_at)
@@ -461,14 +589,26 @@ export class ApiServer {
                 meta.sizeBytes,
                 now,
               );
-          });
-        }
+          }
 
-        return this.sendJson(res, 201, {
+          if (targetProjectId) {
+            this.db.db
+              .prepare(
+                `INSERT OR REPLACE INTO project_assets (project_id, asset_id, display_name, created_at)
+                 VALUES (?, ?, ?, ?)`,
+              )
+              .run(targetProjectId, assetId, displayName, now);
+          }
+        });
+
+        const statusCode = assetRow ? 200 : 201;
+        return this.sendJson(res, statusCode, {
           assetId,
           contentHash: meta.contentHash,
           sizeBytes: meta.sizeBytes,
           blobUrl: `/api/assets/${assetId}/blob`,
+          isDuplicate: Boolean(assetRow),
+          displayName,
         });
       }
 
@@ -492,18 +632,30 @@ export class ApiServer {
         return;
       }
 
-      const assetMetaMatch = pathname.match(/^\/api\/assets\/([^/]+)$/);
-      if (method === "GET" && assetMetaMatch) {
-        const assetId = assetMetaMatch[1]!;
-        const asset = this.db.db
-          .prepare("SELECT * FROM assets WHERE id = ?")
-          .get(assetId) as any;
-        if (!asset) {
-          return this.sendJson(res, 404, {
-            error: `Asset not found: ${assetId}`,
-          });
+      const assetItemMatch = pathname.match(/^\/api\/assets\/([^/]+)$/);
+      if (assetItemMatch) {
+        const assetId = assetItemMatch[1]!;
+
+        if (method === "GET") {
+          const asset = this.db.db
+            .prepare("SELECT * FROM assets WHERE id = ?")
+            .get(assetId) as any;
+          if (!asset) {
+            return this.sendJson(res, 404, {
+              error: `Asset not found: ${assetId}`,
+            });
+          }
+          return this.sendJson(res, 200, { asset });
         }
-        return this.sendJson(res, 200, { asset });
+
+        if (method === "DELETE") {
+          this.db.transaction(() => {
+            this.db.db.prepare("DELETE FROM project_assets WHERE asset_id = ?").run(assetId);
+            this.db.db.prepare("DELETE FROM job_inputs WHERE asset_id = ?").run(assetId);
+            this.db.db.prepare("DELETE FROM assets WHERE id = ?").run(assetId);
+          });
+          return this.sendJson(res, 200, { success: true, deletedAssetId: assetId });
+        }
       }
 
       // 5. Jobs (T2I & I2I)

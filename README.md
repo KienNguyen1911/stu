@@ -13,6 +13,7 @@ Flow Studio provides a reliable, transaction-backed automation layer over Google
 ## ✨ Features
 
 - **🎨 Text-to-Image (T2I) & Image-to-Image (I2I)**: Generate high-resolution images from prompts and reference image assets.
+- **📁 Projects & Reusable Ref Assets Library**: Organize generations by project, reuse uploaded reference images with 1 click in Studio, and eliminate redundant file uploads with automatic SHA-256 content deduplication.
 - **🛡️ Local-First & Credential-Safe**: Browser authentication stays isolated inside native Chrome user profiles. No cookies or raw tokens are stored in the database.
 - **⚡ ACID State Machine**: SQLite-backed job queue with idempotency keys, pre-submission intent tracking, and crash-resilient recovery invariants.
 - **👥 Multi-Account Pooling**: Coordinate multiple accounts with automatic lease acquisition and load distribution.
