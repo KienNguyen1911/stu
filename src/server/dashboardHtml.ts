@@ -3265,7 +3265,11 @@ export function getDashboardHtml(): string {
         const headers = { 'x-display-name': encodeURIComponent(displayName) };
         if (projectId) headers['x-project-id'] = projectId;
 
-        const res = await fetch('/api/assets/upload', {
+        const uploadUrl = projectId
+          ? '/api/assets/upload?projectId=' + encodeURIComponent(projectId) + '&displayName=' + encodeURIComponent(displayName)
+          : '/api/assets/upload?displayName=' + encodeURIComponent(displayName);
+
+        const res = await fetch(uploadUrl, {
           method: 'POST',
           headers,
           body: file,

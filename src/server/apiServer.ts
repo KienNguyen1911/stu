@@ -84,7 +84,7 @@ export class ApiServer {
     );
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
+      "Content-Type, Authorization, x-display-name, x-project-id",
     );
 
     if (req.method === "OPTIONS") {
@@ -438,12 +438,13 @@ export class ApiServer {
                      pa.project_id,
                      (SELECT COUNT(DISTINCT ji.job_id) FROM job_inputs ji WHERE ji.asset_id = a.id) as used_in_jobs_count
               FROM assets a
-              LEFT JOIN project_assets pa ON a.id = pa.asset_id
-              WHERE (pa.project_id = ? OR a.id IN (SELECT ji.asset_id FROM job_inputs ji JOIN jobs j ON ji.job_id = j.id WHERE j.project_id = ?))
-                AND a.id NOT IN (SELECT local_asset_id FROM job_outputs WHERE local_asset_id IS NOT NULL)
+              LEFT JOIN project_assets pa ON a.id = pa.asset_id AND pa.project_id = ?
+              WHERE pa.project_id = ?
+                 OR (a.id IN (SELECT ji.asset_id FROM job_inputs ji JOIN jobs j ON ji.job_id = j.id WHERE j.project_id = ?)
+                     AND a.id NOT IN (SELECT local_asset_id FROM job_outputs WHERE local_asset_id IS NOT NULL))
               ORDER BY a.created_at DESC
             `)
-            .all(projId, projId) as any[];
+            .all(projId, projId, projId) as any[];
 
           const uploadedAssets = uploadedAssetsRaw.map(a => ({
             ...a,
@@ -655,8 +656,12 @@ export class ApiServer {
       if (method === "POST" && pathname === "/api/assets/upload") {
         const contentType = req.headers["content-type"] || "";
         const urlObj = new URL(req.url || "/", "http://localhost");
-        let displayName = urlObj.searchParams.get("displayName") || (req.headers["x-display-name"] as string) || "Reference Image";
-        let targetProjectId = urlObj.searchParams.get("projectId") || null;
+        const rawDisplayName = urlObj.searchParams.get("displayName") || (req.headers["x-display-name"] as string) || "Reference Image";
+        let displayName = rawDisplayName;
+        try {
+          displayName = decodeURIComponent(rawDisplayName);
+        } catch {}
+        let targetProjectId = (req.headers["x-project-id"] as string) || urlObj.searchParams.get("projectId") || null;
         let buffer: Buffer;
 
         if (contentType.includes("application/json")) {
