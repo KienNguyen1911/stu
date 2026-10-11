@@ -1,0 +1,35 @@
+{
+  "name": "flow-studio",
+  "version": "1.0.0",
+  "description": "Flow Studio - Local-first Google Flow automation, REST API server, and web dashboard",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "license": "MIT",
+  "keywords": [
+    "google-flow",
+    "image-generation",
+    "playwright",
+    "automation",
+    "local-first",
+    "imagen",
+    "mcp"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/scripts/start-server.js",
+    "server": "node dist/scripts/start-server.js",
+    "generate": "node dist/scripts/generate-image.js",
+    "login": "node dist/scripts/login-account.js",
+    "link": "node dist/scripts/link-project.js",
+    "test": "node --test dist/tests/*.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "playwright-core": "^1.50.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
