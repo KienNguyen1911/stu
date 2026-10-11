@@ -2340,23 +2340,23 @@ export function getDashboardHtml(): string {
             '<div class="profile-detail-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--border);">' +
               '<span class="detail-k">Kích hoạt (Nhận Job):</span>' +
               '<label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600;">' +
-                '<input type="checkbox" ' + toggleChecked + ' onchange="toggleAccountEnabled('\'' + a.id + '\\', this.checked)" />' +
+                '<input type="checkbox" ' + toggleChecked + ' data-account-id="' + a.id + '" onchange="toggleAccountEnabled(this.dataset.accountId, this.checked)" />' +
                 '<span>' + (a.enabled ? 'Đang bật' : 'Đang tắt') + '</span>' +
               '</label>' +
             '</div>' +
           '</div>' +
 
           '<div class="profile-actions-bar">' +
-            '<button type="button" class="profile-action-btn btn-login" onclick="triggerAccountLogin('\'' + a.id + '\\', '\'' + escapeHtml(a.label) + '\\')">' +
+            '<button type="button" class="profile-action-btn btn-login" data-id="' + a.id + '" data-label="' + escapeHtml(a.label) + '" onclick="triggerAccountLogin(this.dataset.id, this.dataset.label)">' +
               '<span>🔑 Mở Chrome Đăng Nhập</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" onclick="openEditProfileModal('\'' + a.id + '\\')">' +
+            '<button type="button" class="profile-action-btn" data-id="' + a.id + '" onclick="openEditProfileModal(this.dataset.id)">' +
               '<span>✏️ Sửa</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" onclick="checkAccountSession('\'' + a.id + '\\')">' +
+            '<button type="button" class="profile-action-btn" data-id="' + a.id + '" onclick="checkAccountSession(this.dataset.id)">' +
               '<span>🔄 Kiểm tra</span>' +
             '</button>' +
-            '<button type="button" class="profile-action-btn" style="color: var(--danger);" onclick="openDeleteProfileModal('\'' + a.id + '\\', '\'' + escapeHtml(a.label) + '\\', '\'' + escapeHtml(a.profilePath) + '\\')">' +
+            '<button type="button" class="profile-action-btn" style="color: var(--danger);" data-id="' + a.id + '" data-label="' + escapeHtml(a.label) + '" data-path="' + escapeHtml(a.profilePath) + '" onclick="openDeleteProfileModal(this.dataset.id, this.dataset.label, this.dataset.path)">' +
               '<span>🗑️ Xóa</span>' +
             '</button>' +
           '</div>' +
@@ -2629,7 +2629,7 @@ export function getDashboardHtml(): string {
       let html = '';
 
       const isAllActive = !selectedHierarchyAccountId;
-      html += '<button type="button" class="account-pill ' + (isAllActive ? 'active' : '') + '" onclick="filterProjectsByAccount(\'\')">' +
+      html += '<button type="button" class="account-pill ' + (isAllActive ? 'active' : '') + '" data-account-id="" onclick="filterProjectsByAccount(this.dataset.accountId)">' +
         '<span>🌐</span>' +
         '<span>Tất Cả Accounts</span>' +
         '<span class="badge badge-neutral" style="font-size: 10px;">' + totalAccs + '</span>' +
@@ -2641,7 +2641,7 @@ export function getDashboardHtml(): string {
         const dotColor = isAuthed ? 'var(--success)' : 'var(--warning)';
         const projCount = projectsDataCache.filter(p => p.account_id === acc.id).length;
 
-        html += '<button type="button" class="account-pill ' + (isActive ? 'active' : '') + '" onclick="filterProjectsByAccount(\'' + escapeHtml(acc.id) + '\')">' +
+        html += '<button type="button" class="account-pill ' + (isActive ? 'active' : '') + '" data-account-id="' + escapeHtml(acc.id) + '" onclick="filterProjectsByAccount(this.dataset.accountId)">' +
           '<span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: ' + dotColor + ';"></span>' +
           '<span>👤 ' + escapeHtml(acc.label) + ' <span style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">(' + escapeHtml(acc.id) + ')</span></span>' +
           '<span class="badge badge-neutral" style="font-size: 10px;">' + projCount + ' proj</span>' +
@@ -2756,16 +2756,16 @@ export function getDashboardHtml(): string {
           '</div>' +
 
           '<div style="display: flex; gap: 6px; align-items: center; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); flex-wrap: wrap;">' +
-            '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 6px 8px; font-weight: 600;" onclick="selectProjectForImages(\'' + escapeHtml(p.id) + '\')">' +
+            '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 6px 8px; font-weight: 600;" data-id="' + escapeHtml(p.id) + '" onclick="selectProjectForImages(this.dataset.id)">' +
               '📂 Mở Kho Ảnh' +
             '</button>' +
-            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="useProjectInStudio(\'' + escapeHtml(p.id) + '\')" title="Dùng tạo ảnh trong Studio">' +
+            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" data-id="' + escapeHtml(p.id) + '" onclick="useProjectInStudio(this.dataset.id)" title="Dùng tạo ảnh trong Studio">' +
               '🎨 Studio' +
             '</button>' +
-            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="openEditProjectModal(\'' + escapeHtml(p.id) + '\')" title="Sửa project">' +
+            '<button type="button" class="btn-quiet" style="font-size: 11.5px; padding: 6px 8px;" data-id="' + escapeHtml(p.id) + '" onclick="openEditProjectModal(this.dataset.id)" title="Sửa project">' +
               '✏️' +
             '</button>' +
-            '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 6px 8px;" onclick="openDeleteProjectModal(\'' + escapeHtml(p.id) + '\', \'' + escapeHtml(p.name) + '\')" title="Xóa project">' +
+            '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 6px 8px;" data-id="' + escapeHtml(p.id) + '" data-name="' + escapeHtml(p.name) + '" onclick="openDeleteProjectModal(this.dataset.id, this.dataset.name)" title="Xóa project">' +
               '🗑️' +
             '</button>' +
           '</div>' +
@@ -2884,10 +2884,10 @@ export function getDashboardHtml(): string {
               '<span class="badge ' + (usedCount > 0 ? 'badge-success' : 'badge-neutral') + '" style="font-size: 10px;">' + usedCount + ' jobs</span>' +
             '</div>' +
             '<div style="display: flex; gap: 6px; margin-top: auto; padding-top: 6px; border-top: 1px solid var(--border);">' +
-              '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 5px 8px;" onclick="selectAssetForStudio('\'' + escapeHtml(a.id) + '\\')">' +
+              '<button type="button" class="btn-primary" style="flex: 1; font-size: 11.5px; padding: 5px 8px;" data-id="' + escapeHtml(a.id) + '" onclick="selectAssetForStudio(this.dataset.id)">' +
                 '⚡ Dùng tạo ảnh' +
               '</button>' +
-              '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 5px 8px;" onclick="deleteRefAsset('\'' + escapeHtml(a.id) + '\\')">' +
+              '<button type="button" class="btn-danger-quiet" style="font-size: 11.5px; padding: 5px 8px;" data-id="' + escapeHtml(a.id) + '" onclick="deleteRefAsset(this.dataset.id)">' +
                 '🗑️' +
               '</button>' +
             '</div>' +
@@ -2906,7 +2906,7 @@ export function getDashboardHtml(): string {
           '<div style="font-size: 28px; margin-bottom: 8px;">🎨</div>' +
           '<h4 style="font-size: 15px; margin-bottom: 4px;">Chưa có ảnh nào được tạo trên Google Flow trong dự án này</h4>' +
           '<p style="font-size: 12px; margin-bottom: 12px;">Chuyển sang Studio Sáng Tạo để gửi yêu cầu tạo ảnh T2I hoặc I2I.</p>' +
-          '<button type="button" class="btn-primary" onclick="useProjectInStudio('\'' + escapeHtml(selectedHierarchyProjectId) + '\\')">🎨 Mở Studio Tạo Ảnh</button>' +
+          '<button type="button" class="btn-primary" data-id="' + escapeHtml(selectedHierarchyProjectId) + '" onclick="useProjectInStudio(this.dataset.id)">🎨 Mở Studio Tạo Ảnh</button>' +
         '</div>';
         return;
       }
@@ -2929,7 +2929,7 @@ export function getDashboardHtml(): string {
               '<div style="display: flex; gap: 4px; flex-wrap: wrap;">' +
                 '<button type="button" class="btn-quiet btn-reuse-prompt" data-prompt="' + cleanPrompt + '" style="padding: 3px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4);">⚡ Prompt</button>' +
                 '<a href="' + escapeHtml(g.imageUrl) + '" download="flow-image.png" class="btn-quiet" style="padding: 3px 6px; font-size: 10px; color: #fff; border-color: rgba(255,255,255,0.4); text-decoration: none;">⬇ PNG</a>' +
-                '<button type="button" class="btn-primary" style="padding: 3px 8px; font-size: 10px;" onclick="importGeneratedAsRef(selectedHierarchyProjectId, '' + escapeHtml(assetId) + '')"\\'") + '\\')">🔄 Dùng làm ảnh Ref</button>' +
+                '<button type="button" class="btn-primary" style="padding: 3px 8px; font-size: 10px;" data-project="' + escapeHtml(selectedHierarchyProjectId) + '" data-asset="' + escapeHtml(assetId) + '" onclick="importGeneratedAsRef(this.dataset.project, this.dataset.asset)">🔄 Dùng làm ảnh Ref</button>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -3140,7 +3140,7 @@ export function getDashboardHtml(): string {
       for (const a of assets) {
         const name = a.displayName || a.id;
         const sizeStr = formatBytes(a.sizeBytes);
-        html += '<div class="ref-asset-card" style="cursor: pointer;" onclick="selectAssetForStudio(\'' + escapeHtml(a.id) + '\'); closeModal(\'selectRefAssetModal\');">' +
+        html += '<div class="ref-asset-card" style="cursor: pointer;" data-id="' + escapeHtml(a.id) + '" onclick="selectAssetForStudio(this.dataset.id); closeModal(&apos;selectRefAssetModal&apos;);">' +
           '<div class="ref-asset-thumb-wrap" style="height: 110px;">' +
             '<img src="' + escapeHtml(a.blobUrl) + '" class="ref-asset-thumb" alt="Ref" />' +
           '</div>' +
